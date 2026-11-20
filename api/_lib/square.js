@@ -49,6 +49,25 @@ function fmtTime(t) { // "11:30:00" -> "11:30 AM"
   return hh + (m ? ':' + String(m).padStart(2, '0') : '') + ' ' + ap;
 }
 
+// "Classic Cinnamon Roll - Saturday Preorder 11/14 (contains dairy & meat)" ->
+// { name: "Classic Cinnamon Roll", tag: "Contains dairy & meat", date: "2026-11-14" }
+function cleanName(raw) {
+  let name = raw, tag = '', date = null;
+  const p = name.match(/\((contains[^)]*)\)/i);
+  if (p) { tag = p[1].charAt(0).toUpperCase() + p[1].slice(1); name = name.replace(p[0], ''); }
+  const md = name.match(/(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/);
+  if (md) {
+    const now = new Date(); let y = md[3] ? +(md[3].length === 2 ? '20' + md[3] : md[3]) : now.getFullYear();
+    // a December date seen in January belongs to last year
+    if (!md[3] && +md[1] === 12 && now.getMonth() === 0) y -= 1;
+    date = y + '-' + String(md[1]).padStart(2, '0') + '-' + String(md[2]).padStart(2, '0');
+  }
+  name = name.replace(/\s*[-–]\s*(mon|tues|wednes|thurs|fri|satur|sun)day\b.*$/i, '')
+    .replace(/\s*[-–]\s*(pop[\s-]?up|pre-?order|pickup|pick up)\b.*$/i, '')
+    .replace(/\s{2,}/g, ' ').trim();
+  return { name, tag, date };
+}
+
 // Builds the live menu: items per day + pickup hours from the location's business hours.
 async function getMenu(debug) {
   const [objs, loc] = await Promise.all([
@@ -71,6 +90,8 @@ async function getMenu(debug) {
   objs.filter((o) => o.type === 'ITEM' && !o.is_deleted && here(o)).forEach((o) => {
     const d = o.item_data || {};
     if (d.is_archived) return;
+    // Only what is switched on for Square Online right now (Square: Item > Online visibility).
+    if (!debug && d.ecom_visibility !== 'VISIBLE') return;
     const catIds = (d.categories || []).map((c) => c.id).concat(d.category_id ? [d.category_id] : []);
     const days = [...new Set(catIds.map((c) => dayOfCat[c]).filter(Boolean))];
     if (!days.length) return;
@@ -82,8 +103,11 @@ async function getMenu(debug) {
     if (!vars.length) return;
     const v = vars.find((x) => !x.soldOut) || vars[0];
     const imgId = (d.image_ids || [])[0];
+    const raw = (d.name || '').trim();
+    const nm = cleanName(raw);
+    if (!debug && nm.date && nm.date < todayIn(L.timezone || 'America/New_York')) return; // dated for a pickup that already passed
     items.push({
-      id: o.id, varId: v.id, name: (d.name || '').trim(), desc: (d.description_plaintext || d.description || '').trim(),
+      id: o.id, varId: v.id, name: nm.name, tag: nm.tag || undefined, desc: (d.description_plaintext || d.description || '').trim(),
       price: v.cents / 100, soldOut: vars.every((x) => x.soldOut), img: imgId ? imgs[imgId] || null : null, days,
       ord: (d.categories || [])[0] && (d.categories || [])[0].ordinal || 0,
       _dbg: { ev: d.ecom_visibility, ea: d.ecom_available, vis: d.visibility, ao: d.available_online, ap: d.available_for_pickup, ch: d.channels, ap_ids: d.availability_period_ids, pt: d.product_type, upd: o.updated_at, vtrack: (d.variations||[]).map(v=>{const vd=v.item_variation_data||{};return [vd.track_inventory, vd.sellable, vd.stockable, (vd.location_overrides||[]).map(x=>x.location_id.slice(0,4)+':'+(x.sold_out?'SO':'')+(x.track_inventory?'T':''))]}) },
@@ -97,6 +121,17 @@ async function getMenu(debug) {
   });
   const a = L.address || {};
   if (!debug) items.forEach((i) => delete i._dbg);
+  // Each flavor once per day: keep the in-stock version if there are duplicates.
+  const seen = {};
+  const uniq = [];
+  items.forEach((it) => it.days.forEach((dk) => {
+    const k = dk + '|' + it.name.toLowerCase();
+    if (seen[k] && (!seen[k].soldOut || it.soldOut)) return;
+    const copy = Object.assign({}, it, { days: [dk] });
+    if (seen[k]) uniq.splice(uniq.indexOf(seen[k]), 1, copy); else uniq.push(copy);
+    seen[k] = copy;
+  }));
+  items.length = 0; uniq.forEach((x) => items.push(x));
   return {
     items,
     hours,
