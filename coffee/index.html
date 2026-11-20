@@ -145,6 +145,7 @@ p.body{color:var(--soft);max-width:44ch;font-size:clamp(15px,1.15vw,17px)}
 .home{padding-top:clamp(110px,13vw,190px);padding-bottom:clamp(110px,13vw,190px);display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(40px,7vw,120px);align-items:center}
 .home img{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:2px}
 .home .ctas{display:flex;gap:14px;flex-wrap:wrap;margin-top:30px}
+.bflav{margin-top:34px;scroll-margin-top:110px}.bflav ul{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:0}.bflav li{padding:14px 0;border-top:1px solid var(--hair);display:grid;grid-template-columns:1fr auto;gap:4px 18px}.bflav b{font-family:var(--display);font-weight:400;font-size:clamp(20px,1.8vw,26px);line-height:1.1}.bflav span{font-size:13px;color:var(--soft);align-self:center}.bflav p{grid-column:1/-1;margin:0;font-size:14px;line-height:1.55;color:var(--soft)}.bflav .so{opacity:.5}
 .bottle{grid-template-columns:.9fr 1.1fr;border-top:1px solid var(--hair)}.bottle .ph{order:2}
 .ph-hold{aspect-ratio:4/5;border:1px dashed #D8C6B4;display:grid;place-items:center;color:var(--soft);font-size:11px;letter-spacing:.2em;text-transform:uppercase;background:#F6EADD}
 #visit{border-top:1px solid var(--hair)}
@@ -273,7 +274,8 @@ footer{padding-top:30px;padding-bottom:40px;font-size:12px;color:var(--soft);dis
     <div class="kicker">Take it home</div>
     <h2 style="margin-top:22px">Our coffee,<br><em>by the bottle.</em></h2>
     <p class="body" style="margin-top:26px">Our lattes and matchas, bottled fresh and ready for your fridge. Flavors rotate with the season, so grab one with your box.</p>
-    <div class="ctas"><a class="pill" href="/menu/" style="margin-left:0">Pre-order a bottle <i></i></a></div>
+    <div class="ctas" id="bcta"><a class="pill" href="/menu/" style="margin-left:0">Pre-order a bottle <i></i></a><a class="ghost" href="#bflav">See the flavors</a></div>
+    <div id="bflav" class="bflav" hidden><div class="kicker">Bottled this week</div><ul id="bfl"></ul></div>
   </div>
   <div class="ph rv bgrid">
     <figure class="wide" style="margin:0"><img src="b-four.webp" alt="Four Donutste bottled drinks in a row: vanilla matcha, Fruity Pebbles matcha, Biscoff cold brew latte, ube matcha latte"></figure>
@@ -321,4 +323,12 @@ document.querySelectorAll('video').forEach(function(v){vio.observe(v)});
 })();
 </script>
 <script src="/nav.js" defer></script>
+<script>
+(function(){var cta=document.getElementById('bcta'),box=document.getElementById('bflav'),ul=document.getElementById('bfl');
+function esc(t){return String(t||'').replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]})}
+fetch('/api/menu').then(function(r){return r.json()}).then(function(m){var B=m.bottles||[],N=(window.CHEF||{});
+ if(!B.length){cta.innerHTML='<p class="body" style="margin:0">Bottles are between batches right now. They come back on the pre-order menu as soon as the next flavors are ready.</p><a class="pill" href="/menu/" style="margin:18px 0 0">Pre-order your box <i></i></a>';return}
+ ul.innerHTML=B.map(function(b){var note=N[b.name]||b.desc;return '<li'+(b.soldOut?' class="so"':'')+'><b>'+esc(b.name)+'</b><span>'+(b.soldOut?'Sold out':'$'+b.price.toFixed(2))+'</span>'+(note?'<p>'+esc(note).replace(/\n+/g,'<br>')+'</p>':'')+'</li>'}).join('');box.hidden=false;
+}).catch(function(){});})();
+</script>
 </body></html>

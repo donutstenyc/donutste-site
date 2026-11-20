@@ -104,6 +104,10 @@ async function getMenu(debug) {
     if (!debug && d.ecom_visibility !== 'VISIBLE') return;
     const catIds = (d.categories || []).map((c) => c.id).concat(d.category_id ? [d.category_id] : []);
     const days = [...new Set(catIds.map((c) => dayOfCat[c]).filter(Boolean))];
+    // Bottled drinks: Square categories starting with "Bottled" (Bottled Coffee / Matcha / Refresher / Drinks).
+    // They are not tied to one day: switched on for Square Online, they show as add-ons on every regular pickup day.
+    const isBottle = catIds.some((c) => /^bottled\b/i.test((cats[c] || '').trim()));
+    if (isBottle && !days.length) days.push('*B');
     if (!days.length) { if (debug && d.ecom_visibility === 'VISIBLE') (globalThis.__nod = globalThis.__nod || []).push(d.name + ' [' + catIds.map((c) => cats[c]).join(', ') + ']'); return; }
     const vars = (d.variations || []).filter((v) => !v.is_deleted && here(v)).map((v) => {
       const vd = v.item_variation_data || {};
@@ -128,7 +132,7 @@ async function getMenu(debug) {
     const nm = cleanName(raw);
     items.push({
       id: o.id, varId: v.id, name: nm.name, tag: nm.tag || undefined, desc: (d.description_plaintext || d.description || '').trim(),
-      price: v.cents / 100, soldOut: vars.every((x) => x.soldOut), img: imgId ? imgs[imgId] || null : null, days,
+      price: v.cents / 100, soldOut: vars.every((x) => x.soldOut), img: imgId ? imgs[imgId] || null : null, days, bottle: isBottle || undefined,
       ord: (d.categories || [])[0] && (d.categories || [])[0].ordinal || 0,
       _dbg: { ev: d.ecom_visibility, ea: d.ecom_available, vis: d.visibility, ao: d.available_online, ap: d.available_for_pickup, ch: d.channels, ap_ids: d.availability_period_ids, pt: d.product_type, upd: o.updated_at, vtrack: (d.variations||[]).map(v=>{const vd=v.item_variation_data||{};return [vd.track_inventory, vd.sellable, vd.stockable, (vd.location_overrides||[]).map(x=>x.location_id.slice(0,4)+':'+(x.sold_out?'SO':'')+(x.track_inventory?'T':''))]}) },
     });
@@ -177,6 +181,11 @@ async function getMenu(debug) {
     }
   }
   if (!debug) items.forEach((i) => delete i._dbg);
+  // Bottles go on every regular (not holiday, not pop-up) day that is open or has items.
+  const regDays = DAYS.filter((d) => !d.special && !d.popup && (hours[d.key] || items.some((i) => !i.bottle && i.days.includes(d.key)))).map((d) => d.key);
+  const bottles = [];
+  items.forEach((i) => { if (i.days.includes('*B')) { i.days = regDays.slice(); bottles.push({ name: i.name, desc: i.desc, price: i.price, img: i.img, soldOut: i.soldOut }); } });
+  for (let k = items.length - 1; k >= 0; k--) if (!items[k].days.length) items.splice(k, 1);
   // Each flavor once per day: keep the in-stock version if there are duplicates.
   const seen = {};
   const uniq = [];
@@ -193,6 +202,7 @@ async function getMenu(debug) {
     popup,
     noDay, cats: debug ? Object.values(cats) : undefined,
     items,
+    bottles,
     hours,
     timezone: L.timezone || 'America/New_York',
     address: [a.address_line_1, a.address_line_2, a.locality].filter(Boolean).join(', '),

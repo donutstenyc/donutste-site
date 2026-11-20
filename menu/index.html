@@ -58,6 +58,7 @@ p.body{color:var(--soft);max-width:44ch;font-size:clamp(15px,1.15vw,17px)}
 .item .rt{display:flex;align-items:center;gap:clamp(14px,2.4vw,34px)}
 .item .mini{display:flex;gap:6px}.item .mini svg{width:clamp(38px,3.6vw,52px);height:auto}
 .item .price{font-family:var(--display);font-size:clamp(24px,2.2vw,32px);min-width:3.4em;text-align:right}
+.bhd{margin:clamp(34px,4vw,56px) 0 6px;padding-top:22px;border-top:1px solid var(--hair)}.bhd p{margin:8px 0 0;color:var(--soft);font-size:14px}
 .item .days{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
 .item .days span{font-size:10px;letter-spacing:.2em;text-transform:uppercase;border:1px solid var(--hair);border-radius:999px;padding:4px 10px;color:var(--soft)}
 .item .tag{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--pink);border-color:#FBC3D5!important}
@@ -311,9 +312,10 @@ function render(){
   menu.innerHTML=Object.keys(DAYS).map(function(d){var D=DAYS[d],shown=ITEMS.filter(function(it){return it.days.indexOf(d)>=0}),dt=dateFor(D);
     var notes=[];shown.forEach(function(it){notesFor(it).forEach(function(k){if(k!=='wheat'&&notes.indexOf(k)<0)notes.push(k)})});notes=notes.slice(0,5);
     var when=D.popup?(POPUP?'<b>'+fmt(dt)+'</b> &middot; '+POPUP.hours+'<br>'+[POPUP.place,POPUP.addr].filter(Boolean).join(' &middot; '):'The day and the place change every time.'):'Pickup <b>'+fmt(dt)+'</b> &middot; '+D.hours+'<br>Lake Mary';
-    var seenG={},rows=shown.filter(function(it){if(!it.group)return true;if(seenG[it.group])return false;seenG[it.group]=1;return true});
+    var bot=shown.filter(function(x){return x.bottle});shown=shown.filter(function(x){return !x.bottle});var seenG={},rows=shown.filter(function(it){if(!it.group)return true;if(seenG[it.group])return false;seenG[it.group]=1;return true});
     var body=shown.length?rows.map(function(it,i){return it.group?boxRowHTML(it,shown.filter(function(x){return x.group===it.group}),i,d):rowHTML(it,i,d)}).join('')+(d==='Wed'&&!LIVE?'<p class="src">Preview: this week&rsquo;s Wednesday flyer. Every day loads live from Square at launch.</p>':''):
       (LOADING?'<div class="empty">Loading this week&rsquo;s menu&hellip;</div>':'<div class="empty">'+(D.popup?(POPUP?'The pop-up menu posts soon.':'The next pop-up is being planned.'):'This week&rsquo;s '+D.name+' menu posts soon.')+(D.popup?'<small>Date, place and flavors appear here once it is set</small>':'')+'</div>');
+    if(bot.length)body+='<div class="bhd" id="bottles-'+d+'"><div class="kicker">Add a bottle</div><p>Our lattes and matchas, bottled fresh. Picked up with your box.</p></div>'+bot.map(function(it,i){return rowHTML(it,i,d)}).join('');
     return '<section class="dsec" id="d-'+d+'"><div class="dhd"><div><div class="kicker">'+(D.popup?'Pop-up &middot; Dates &amp; places vary':'Pre-order &middot; '+D.name+' pickup')+'</div><h2>'+D.name+'<em>.</em></h2><p class="when">'+when+'</p></div>'+
       (notes.length?'<div class="sks">'+notes.map(function(k){return '<figure>'+svg(k,drawn[d]?'in':'')+'<figcaption>'+LABEL[k]+'</figcaption></figure>'}).join('')+'</div>':'')+'</div>'+body+'</section>'}).join('');
   menu.querySelectorAll('.item').forEach(function(el){function t(e){if(e.target.closest('button,a'))return;var o=el.classList.toggle('open');el.setAttribute('aria-expanded',o)}el.addEventListener('click',t);el.addEventListener('keydown',function(e){if(e.target!==el)return;if(e.key==='Enter'||e.key===' '){e.preventDefault();t(e)}})});
