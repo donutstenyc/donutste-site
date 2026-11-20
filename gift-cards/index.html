@@ -227,7 +227,7 @@ var gan=document.getElementById('gan'),bamt=document.getElementById('bamt'),bmsg
 gan.addEventListener('input',function(){var d=gan.value.replace(/\D/g,'').slice(0,16);gan.value=d.replace(/(.{4})/g,'$1 ').trim()});
 document.getElementById('balf').addEventListener('submit',function(e){e.preventDefault();var d=gan.value.replace(/\D/g,'');
   if(d.length<16){bmsg.textContent='Gift card numbers are 16 digits. Check your email or the back of your card.';return}
-  bmsg.textContent='Checking with Square...';bamt.style.opacity=.3;
+  bmsg.textContent='Checking your balance…';bamt.style.opacity=.3;
   function done(cents){bamt.textContent='$'+(cents/100).toFixed(2);bamt.style.opacity=1;document.getElementById('gln').textContent='Ending in '+d.slice(-4);
     bmsg.textContent=cents>0?'You have $'+(cents/100).toFixed(2)+' left. Treat yourself.':'This card has no balance left.'}
   if(BALANCE_API){fetch(BALANCE_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({gan:d})}).then(function(r){return r.json()}).then(function(j){if(j&&typeof j.cents==='number')done(j.cents);else{bmsg.textContent='We couldn\u2019t find that card. Double-check the number.';bamt.style.opacity=1}}).catch(function(){bmsg.textContent='Something went wrong. Please try again.';bamt.style.opacity=1})}
