@@ -32,7 +32,7 @@ const DAYS = [
   { key: 'Wed', name: 'Wednesday', dow: 3, match: /^wed(nesday)?\b/i, sq: 'WED' },
   { key: 'Thu', name: 'Thursday', dow: 4, match: /^thu(rs(day)?)?\b/i, sq: 'THU' },
   { key: 'Sat', name: 'Saturday', dow: 6, match: /^sat(urday)?\b/i, sq: 'SAT' },
-  { key: 'Pop', name: 'Pop-up', popup: true, match: /^pop[\s-]?ups?\b/i },
+  { key: 'Pop', name: 'Pop-up', popup: true, match: /^(rotating\s+)?pop[\s-]?ups?$/i },
 ];
 
 async function listAll(types) {
@@ -70,9 +70,11 @@ function cleanName(raw) {
 
 // Builds the live menu: items per day + pickup hours from the location's business hours.
 async function getMenu(debug) {
-  const [objs, loc] = await Promise.all([
+  const PID0 = POPUP_LOCATION_ID();
+  const [objs, loc, ploc] = await Promise.all([
     listAll('ITEM,CATEGORY,IMAGE'),
     sq('/v2/locations/' + LOCATION_ID()),
+    PID0 !== LOCATION_ID() ? sq('/v2/locations/' + PID0).catch(() => null) : Promise.resolve(null),
   ]);
   const L = loc.location;
   const cats = {}, imgs = {};
@@ -105,7 +107,6 @@ async function getMenu(debug) {
     const imgId = (d.image_ids || [])[0];
     const raw = (d.name || '').trim();
     const nm = cleanName(raw);
-    if (!debug && nm.date && nm.date < todayIn(L.timezone || 'America/New_York')) return; // dated for a pickup that already passed
     items.push({
       id: o.id, varId: v.id, name: nm.name, tag: nm.tag || undefined, desc: (d.description_plaintext || d.description || '').trim(),
       price: v.cents / 100, soldOut: vars.every((x) => x.soldOut), img: imgId ? imgs[imgId] || null : null, days,
@@ -120,6 +121,30 @@ async function getMenu(debug) {
     hours[d.key] = (hours[d.key] ? hours[d.key] + ', ' : '') + fmtTime(p.start_local_time) + ' – ' + fmtTime(p.end_local_time);
   });
   const a = L.address || {};
+  // Pop-up: date, hours and place come from the pop-up location's business hours + address in Square.
+  let popup = null;
+  const P = ploc && ploc.location;
+  if (P) {
+    const tz = P.timezone || L.timezone || 'America/New_York';
+    const per = (P.business_hours && P.business_hours.periods) || [];
+    const today = todayIn(tz);
+    const codes = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+    for (let k = 1; k <= 14 && !popup; k++) {
+      const [y, m, d] = today.split('-').map(Number);
+      const dt = new Date(Date.UTC(y, m - 1, d + k));
+      const ps = per.filter((p) => p.day_of_week === codes[dt.getUTCDay()]);
+      if (ps.length) {
+        const pa = P.address || {};
+        popup = {
+          date: dt.toISOString().slice(0, 10),
+          hours: ps.map((p) => fmtTime(p.start_local_time) + ' – ' + fmtTime(p.end_local_time)).join(', '),
+          start: ps[0].start_local_time.slice(0, 5),
+          place: (P.description && P.description.length < 60 ? P.description : '') || 'Pop-up',
+          addr: [pa.address_line_1, pa.locality].filter(Boolean).join(', '),
+        };
+      }
+    }
+  }
   if (!debug) items.forEach((i) => delete i._dbg);
   // Each flavor once per day: keep the in-stock version if there are duplicates.
   const seen = {};
@@ -134,6 +159,7 @@ async function getMenu(debug) {
   items.length = 0; uniq.forEach((x) => items.push(x));
   const noDay = debug ? (globalThis.__nod || []) : undefined; globalThis.__nod = [];
   return {
+    popup,
     noDay, cats: debug ? Object.values(cats) : undefined,
     items,
     hours,

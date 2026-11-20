@@ -1,7 +1,7 @@
 // Creates a Square order for the EXACT pickup date the customer chose, then charges it.
 // Prices always come from Square (catalog ids), never from the browser.
 const { sq, LOCATION_ID, POPUP_LOCATION_ID, uid, getMenu, zonedISO, todayIn, send, readBody } = require('./_lib/square');
-const popup = require('../popup.json');
+const manualPopup = require('../popup.json');
 const MAX_DAYS_AHEAD = 21;
 
 module.exports = async (req, res) => {
@@ -14,6 +14,7 @@ module.exports = async (req, res) => {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date || '')) return send(res, 400, { error: 'Pickup date missing.' });
 
     const menu = await getMenu();
+    const popup = (manualPopup && manualPopup.date ? manualPopup : menu.popup) || {};
     const tz = menu.timezone;
     const D = menu.days.find((d) => d.key === day);
     if (!D) return send(res, 400, { error: 'Unknown pickup day.' });
