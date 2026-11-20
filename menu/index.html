@@ -281,7 +281,7 @@ function rowHTML(it,i,d){var n=notesFor(it);
   return '<article class="item in" tabindex="0" aria-expanded="false"><div class="top"><span class="no">'+String(i+1).padStart(2,'0')+'</span><div><h3>'+it.name+'</h3><div class="notes">'+n.map(function(k){return LABEL[k]}).join(' &middot; ')+'</div>'+(it.tag?'<div class="days"><span class="tag">'+it.tag+'</span></div>':'')+'</div>'+
   '<div class="rt"><div class="mini">'+n.map(function(k){return svg(k)}).join('')+'</div><span class="price">'+money(it.price)+'</span><span class="c">'+ctl(it,d)+'</span></div></div>'+
   '<div class="more"><div><div class="inner"><div class="art">'+(it.img?'<img src="'+it.img+'" alt="'+it.name+'" loading="lazy">':'<div class="big">'+n.map(function(k){return svg(k,'in')}).join('')+'</div>')+'</div>'+
-  '<div class="txt"><h4>The flavor</h4><p>'+it.desc+'</p><h4>Notes</h4><ul>'+n.map(function(k){return '<li>'+LABEL[k]+'</li>'}).join('')+'</ul>'+(it.chef?'<h4>Chef&rsquo;s note</h4><p class="chef">'+it.chef+'</p>':'')+(it.soldOut?'':'<button type="button" class="pill big add2" data-d="'+d+'" data-n="'+it.name+'">Add to box <i></i></button>')+'</div></div></div></div></article>'}
+  '<div class="txt"><h4>The flavor</h4><p>'+String(it.desc||'').replace(/\n+/g,'<br>')+'</p><h4>Notes</h4><ul>'+n.map(function(k){return '<li>'+LABEL[k]+'</li>'}).join('')+'</ul>'+(it.chef?'<h4>Chef&rsquo;s note</h4><p class="chef">'+it.chef+'</p>':'')+(it.soldOut?'':'<button type="button" class="pill big add2" data-d="'+d+'" data-n="'+it.name+'">Add to box <i></i></button>')+'</div></div></div></div></article>'}
 var drawn={};
 function render(){
   menu.innerHTML=Object.keys(DAYS).map(function(d){var D=DAYS[d],shown=ITEMS.filter(function(it){return it.days.indexOf(d)>=0}),dt=dateFor(D);

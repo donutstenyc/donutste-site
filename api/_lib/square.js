@@ -142,7 +142,15 @@ async function getMenu(debug) {
   // Manual pickup hours (hours.json) win over the location's business hours, e.g. "11:30 AM – 1:30 PM".
   try { const H = require('../../hours.json'); Object.keys(H).forEach((k) => { if (H[k]) hours[k] = H[k]; }); } catch (_) {}
   const tz0 = L.timezone || 'America/New_York', today0 = todayIn(tz0), special = {};
-  DAYS.filter((x) => x.special).forEach((x) => { const dt = x.dateFor(+today0.slice(0, 4)); if (today0 <= dt) { special[x.key] = dt; hours[x.key] = x.hours; } });
+  DAYS.filter((x) => x.special).forEach((x) => {
+    const dt = x.dateFor(+today0.slice(0, 4)); if (today0 > dt) return;
+    special[x.key] = dt;
+    // Pickup window comes from the item description in Square, e.g. "Pick-Up on Thanks Giving from 9am -10am".
+    const it = items.find((i) => i.days.includes(x.key) && /\d\s*(am|pm)\s*[-–]/i.test(i.desc || ''));
+    const mm = it && it.desc.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)\s*[-–to]+\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)/i);
+    const f = (h, m, ap) => h + (m ? ':' + m : '') + ' ' + ap.toUpperCase();
+    hours[x.key] = mm ? f(mm[1], mm[2], mm[3]) + ' – ' + f(mm[4], mm[5], mm[6]) : x.hours;
+  });
   const a = L.address || {};
   // Pop-up: date, hours and place come from the pop-up location's business hours + address in Square.
   let popup = null;
