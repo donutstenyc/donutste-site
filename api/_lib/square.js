@@ -94,7 +94,7 @@ async function getMenu(debug) {
     if (!debug && d.ecom_visibility !== 'VISIBLE') return;
     const catIds = (d.categories || []).map((c) => c.id).concat(d.category_id ? [d.category_id] : []);
     const days = [...new Set(catIds.map((c) => dayOfCat[c]).filter(Boolean))];
-    if (!days.length) return;
+    if (!days.length) { if (debug && d.ecom_visibility === 'VISIBLE') (globalThis.__nod = globalThis.__nod || []).push(d.name + ' [' + catIds.map((c) => cats[c]).join(', ') + ']'); return; }
     const vars = (d.variations || []).filter((v) => !v.is_deleted && here(v)).map((v) => {
       const vd = v.item_variation_data || {};
       const ov = (vd.location_overrides || []).find((x) => x.location_id === L.id) || {};
@@ -132,7 +132,9 @@ async function getMenu(debug) {
     seen[k] = copy;
   }));
   items.length = 0; uniq.forEach((x) => items.push(x));
+  const noDay = debug ? (globalThis.__nod || []) : undefined; globalThis.__nod = [];
   return {
+    noDay, cats: debug ? Object.values(cats) : undefined,
     items,
     hours,
     timezone: L.timezone || 'America/New_York',
