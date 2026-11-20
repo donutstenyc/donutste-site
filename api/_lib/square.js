@@ -38,6 +38,10 @@ const DAYS = [
   { key: 'Sat', name: 'Saturday', dow: 6, match: /^sat(urday)?\b/i, sq: 'SAT' },
   { key: 'Sun', name: 'Sunday', dow: 0, match: /^sun(day)?\b/i, sq: 'SUN' },
   { key: 'Pop', name: 'Pop-up', popup: true, match: /^(rotating\s+)?pop[\s-]?ups?$/i },
+  // Holiday pre-order: Square category "Thanksgiving Pre-Order". Pickup on Thanksgiving Day (4th Thursday of November),
+  // 7:30-9:30 AM. Shows only until Thanksgiving, then disappears on its own.
+  { key: 'Tgv', name: 'Thanksgiving', special: true, match: /thanksgiving\s*pre-?order/i, hours: '7:30 AM – 9:30 AM',
+    dateFor: (y) => { const d = new Date(Date.UTC(y, 10, 1)); const first = (4 - d.getUTCDay() + 7) % 7; return y + '-11-' + String(1 + first + 21).padStart(2, '0'); } },
 ];
 async function listAll(types) {
   let cursor, out = [];
@@ -107,6 +111,17 @@ async function getMenu(debug) {
       return { id: v.id, name: vd.name || '', cents: vd.price_money ? Number(vd.price_money.amount) : null, soldOut: !!ov.sold_out };
     }).filter((v) => v.cents != null);
     if (!vars.length) return;
+    const special = days.filter((k) => (DAYS.find((x) => x.key === k) || {}).special);
+    if (special.length) {
+      const raw0 = cleanName((d.name || '').trim()).name.replace(/thanks\s+giving/ig, 'Thanksgiving');
+      const imgId0 = (d.image_ids || [])[0];
+      vars.forEach((vv) => items.push({
+        id: o.id, varId: vv.id, name: raw0 + (vars.length > 1 ? ' · ' + vv.name.replace(/^quantity:\s*/i, '') : ''),
+        desc: (d.description_plaintext || d.description || '').trim(), price: vv.cents / 100, soldOut: vv.soldOut,
+        img: imgId0 ? imgs[imgId0] || null : null, days: special, ord: 0,
+      }));
+      return;
+    }
     const v = vars.find((x) => !x.soldOut) || vars[0];
     const imgId = (d.image_ids || [])[0];
     const raw = (d.name || '').trim();
@@ -126,6 +141,8 @@ async function getMenu(debug) {
   });
   // Manual pickup hours (hours.json) win over the location's business hours, e.g. "11:30 AM – 1:30 PM".
   try { const H = require('../../hours.json'); Object.keys(H).forEach((k) => { if (H[k]) hours[k] = H[k]; }); } catch (_) {}
+  const tz0 = L.timezone || 'America/New_York', today0 = todayIn(tz0), special = {};
+  DAYS.filter((x) => x.special).forEach((x) => { const dt = x.dateFor(+today0.slice(0, 4)); if (today0 <= dt) { special[x.key] = dt; hours[x.key] = x.hours; } });
   const a = L.address || {};
   // Pop-up: date, hours and place come from the pop-up location's business hours + address in Square.
   let popup = null;
@@ -162,7 +179,7 @@ async function getMenu(debug) {
     if (seen[k]) uniq.splice(uniq.indexOf(seen[k]), 1, copy); else uniq.push(copy);
     seen[k] = copy;
   }));
-  items.length = 0; uniq.forEach((x) => items.push(x));
+  items.length = 0; uniq.forEach((x) => { const sd = DAYS.find((d) => d.key === x.days[0]); if (sd && sd.special && !special[sd.key]) return; items.push(x); });
   const noDay = debug ? (globalThis.__nod || []) : undefined; globalThis.__nod = [];
   return {
     popup,
@@ -171,8 +188,9 @@ async function getMenu(debug) {
     hours,
     timezone: L.timezone || 'America/New_York',
     address: [a.address_line_1, a.address_line_2, a.locality].filter(Boolean).join(', '),
-    days: DAYS.filter((d) => d.popup || hours[d.key] || items.some((i) => i.days.includes(d.key)))
-      .map(({ key, name, dow, popup }) => ({ key, name, dow, popup: !!popup })),
+    days: DAYS.filter((d) => d.special ? (special[d.key] && items.some((i) => i.days.includes(d.key))) : (d.popup || hours[d.key] || items.some((i) => i.days.includes(d.key))))
+      .map(({ key, name, dow, popup, special: sp }) => ({ key, name, dow, popup: !!popup, special: !!sp, date: sp ? special[key] : undefined }))
+      .sort((a, b) => b.special - a.special),
   };
 }
 

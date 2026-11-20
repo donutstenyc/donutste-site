@@ -4,7 +4,7 @@ const { sq, LOCATION_ID, POPUP_LOCATION_ID, uid, getMenu, zonedISO, todayIn, sen
 const manualPopup = require('../popup.json');
 const { findDiscount } = require('./_lib/discount');
 const { sendMail, orderEmail } = require('./_lib/mail');
-const MAX_DAYS_AHEAD = 21;
+const MAX_DAYS_AHEAD = 45;
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return send(res, 405, { error: 'POST only' });
@@ -27,6 +27,7 @@ module.exports = async (req, res) => {
     const [y, m, d] = date.split('-').map(Number);
     const wd = new Date(Date.UTC(y, m - 1, d)).getUTCDay();
     if (D.popup) { if (!popup.date || popup.date !== date) return send(res, 400, { error: 'This pop-up is not taking orders.' }); }
+    else if (D.special) { if (D.date !== date) return send(res, 400, { error: 'Pickup date does not match the day.' }); }
     else if (wd !== D.dow) return send(res, 400, { error: 'Pickup date does not match the day.' });
     if ((Date.UTC(y, m - 1, d) - Date.parse(today)) / 864e5 > MAX_DAYS_AHEAD) return send(res, 400, { error: 'That date is too far ahead.' });
 

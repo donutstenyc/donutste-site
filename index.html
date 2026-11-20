@@ -185,6 +185,15 @@ button.po-day:focus-visible{outline:2px solid var(--pink);outline-offset:4px}
 .story-strip figure:nth-child(even){margin-top:clamp(24px,4vw,60px)}
 .story-strip figcaption{margin-top:12px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--soft)}
 @media (max-width:820px){.story-strip{grid-template-columns:1fr 1fr}}
+.holiday{background:var(--pink);color:#22130B;padding:clamp(28px,4vw,48px) clamp(16px,4vw,56px)}
+.holiday[hidden]{display:none}
+.hol-in{max-width:1280px;margin:0 auto;display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.hol-k{font-size:11px;letter-spacing:.22em;text-transform:uppercase;margin-bottom:12px}
+.holiday h2{font-family:'Instrument Serif',serif;font-weight:400;text-transform:uppercase;font-size:clamp(38px,6vw,84px);line-height:.95;margin:0}
+.holiday h2 em{font-style:normal;color:#fff}
+.holiday p{margin:12px 0 0;font-size:15px}
+.hol-cta{display:inline-flex;align-items:center;gap:10px;background:#22130B;color:#F6F4F3;border-radius:999px;padding:16px 26px;font-size:12px;letter-spacing:.18em;text-transform:uppercase;text-decoration:none;white-space:nowrap}
+.hol-cta i{width:18px;height:1px;background:currentColor;position:relative}
 </style>
 
 <header>
@@ -196,6 +205,12 @@ button.po-day:focus-visible{outline:2px solid var(--pink);outline-offset:4px}
 </header>
 
 <main id="top">
+  <section class="holiday" id="holiday" hidden aria-label="Thanksgiving pre-order">
+    <div class="hol-in">
+      <div><div class="hol-k">Thanksgiving pre-order</div><h2>Order a Thanksgiving box<em>.</em></h2><p id="holwhen">Pickup Thanksgiving morning in Lake Mary.</p></div>
+      <a class="hol-cta" href="/menu/#d-Tgv">Order a box <i></i></a>
+    </div>
+  </section>
   <section class="preorder" id="order">
     <div class="po-head">
       <p class="slogan">Welcome Home</p>
@@ -344,7 +359,12 @@ button.po-day:focus-visible{outline:2px solid var(--pink);outline-offset:4px}
   document.getElementById('thu').textContent=next(4);
   // Live: pickup day cards follow Square (same days as the Menu page).
   if(!/claude|^$|localhost/.test(location.hostname)&&location.protocol!=='file:')fetch('/api/menu').then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(m){
-    if(!m.days||!m.days.length)return;var el=document.getElementById('podays');
+    if(!m.days||!m.days.length)return;
+    var sp=m.days.filter(function(x){return x.special&&x.date})[0];
+    if(sp){var t=new Date();var ymd=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
+      if(ymd<=sp.date){var h=document.getElementById('holiday');h.hidden=false;h.querySelector('.hol-cta').href='/menu/#d-'+sp.key;
+        document.getElementById('holwhen').textContent='Pickup '+new Date(sp.date+'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})+(m.hours&&m.hours[sp.key]?', '+m.hours[sp.key]:'')+' in Lake Mary.'}}
+    m.days=m.days.filter(function(x){return !x.special});var el=document.getElementById('podays');
     el.innerHTML=m.days.map(function(x){return x.popup?'<a class="po-day" href="/menu/#d-Pop"><span class="po-label">Pop-up</span><span class="po-date">'+(m.popup&&m.popup.date?new Date(m.popup.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}):'Varies')+'</span><span class="po-cta">Where next <i></i></span></a>':'<a class="po-day" href="/menu/#d-'+x.key+'"><span class="po-label">'+x.name+' pickup</span><span class="po-date">'+next(x.dow)+'</span><span class="po-cta">See the menu <i></i></span></a>'}).join('');
     el.style.setProperty('--n',Math.min(m.days.length,5));}).catch(function(){});
   document.querySelectorAll('button.po-day').forEach(function(btn){btn.addEventListener('click',function(){document.querySelectorAll('button.po-day').forEach(function(x){x.classList.toggle('on',x===btn);x.setAttribute('aria-selected',x===btn)});});});

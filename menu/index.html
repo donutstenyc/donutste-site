@@ -264,7 +264,7 @@ var DAYS={
 // the pop-up's flavors come from Square category "Pop-up". Each Square category (Wednesday/Thursday/Saturday/Pop-up) fills its own section.
 // Example once set: POPUP={date:'2026-12-05',hours:'10 AM – 2 PM',place:'Venue name',addr:'Street, City'}
 var POPUP=null;
-function dateFor(D){if(D.popup){if(!POPUP)return null;var p=POPUP.date.split('-');return new Date(+p[0],p[1]-1,+p[2])}return nextDate(D.dow)}
+function dateFor(D){if(D.date){var q=D.date.split('-');return new Date(+q[0],q[1]-1,+q[2])}if(D.popup){if(!POPUP)return null;var p=POPUP.date.split('-');return new Date(+p[0],p[1]-1,+p[2])}return nextDate(D.dow)}
 function hoursFor(D){return D.popup?(POPUP?POPUP.hours:''):D.hours}
 function addrFor(D){return D.popup?(POPUP?[POPUP.place,POPUP.addr].filter(Boolean).join(', '):''):D.addr}
 function nextDate(dow){var d=new Date();d.setHours(0,0,0,0);var k=(dow-d.getDay()+7)%7;if(k===0)k=7;d.setDate(d.getDate()+k);return d}
@@ -354,7 +354,7 @@ document.getElementById('cobtn').addEventListener('click',function(e){e.preventD
 if(LIVE)fetch('/api/menu').then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(m){
   ITEMS=m.items||[];var H=m.hours||{};
   // Days come from Square: any weekday with pickup hours or a day category with items gets its own section.
-  if(m.days&&m.days.length){var ND={};m.days.forEach(function(x){ND[x.key]=x.popup?{name:x.name,popup:true}:{name:x.name,dow:x.dow,hours:H[x.key]||'Pickup hours posted soon',addr:m.address||''}});DAYS=ND;jumpUI()}
+  if(m.days&&m.days.length){var ND={};m.days.forEach(function(x){ND[x.key]=x.popup?{name:x.name,popup:true}:{name:x.name,dow:x.dow,date:x.date,special:x.special,hours:H[x.key]||'Pickup hours posted soon',addr:m.address||''}});DAYS=ND;jumpUI()}
   else Object.keys(DAYS).forEach(function(k){if(!DAYS[k].popup){DAYS[k].hours=H[k]||'Pickup hours posted soon';if(m.address)DAYS[k].addr=m.address}});
   POPUP=m.popup||null;LOADING=false;render();goHash()}).catch(function(){LOADING=false;render()});
 var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.12});
