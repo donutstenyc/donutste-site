@@ -321,7 +321,7 @@ document.getElementById('cobtn').addEventListener('click',function(e){e.preventD
   '<div class="code"><input id="ccode" placeholder="Discount code" autocomplete="off" aria-label="Discount code"><button type="button" id="capply">Apply</button></div><p id="cmsg" style="font-size:12px;margin:-8px 0 0;color:var(--soft);min-height:1em"></p>'+
   '<label>Name<input autocomplete="name" id="cn"></label><label>Email<input type="email" autocomplete="email" id="ce"></label><label>Phone<input type="tel" autocomplete="tel" id="cp"></label>'+
   '<div class="meth" role="tablist"><button type="button" class="on" data-m="card">Card</button><button type="button" data-m="gift">Donutste gift card</button></div><div class="card" id="cardbox">'+(LIVE?'Loading secure card form&hellip;':'Square secure card form appears here on donutste.com')+'</div><div class="card" id="giftbox" style="display:none"></div><p class="err" id="cerr" style="color:#B3261E;font-size:13px;margin:0;min-height:1em"></p>'+
-  '<button class="pill pay" type="button" id="pay">Pay '+money(boxTotal())+' <i></i></button><p style="font-size:11px;color:var(--soft);margin:0;text-align:center">Payments are processed securely by Square.</p>';
+  '<button class="pill pay" type="button" id="pay">Pay '+money(boxTotal())+' <i></i></button><p style="font-size:11px;color:var(--soft);margin:0;text-align:center">All pre-orders are non-refundable. Payments are processed securely by Square.</p>';
   pn.querySelector('.x').addEventListener('click',closeD);
   dr.classList.add('show');
   card=null;var gcard=null,meth='card',code='',total=boxTotal();
