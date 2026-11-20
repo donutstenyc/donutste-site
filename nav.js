@@ -31,3 +31,28 @@
   m.addEventListener('click', function (e) { if (e.target.closest('a')) set(false); });
   addEventListener('keydown', function (e) { if (e.key === 'Escape') set(false); });
 })();
+
+// Phones: lift any text that is too small to read. Body text to at least 16px,
+// small uppercase labels to at least 12px. Runs again when pages add content (menu, crate).
+(function () {
+  if (!matchMedia('(max-width:700px)').matches) return;
+  var SKIP = '#ctl, svg, canvas, .mnav-btn, .pads, .meter';
+  function lift(root) {
+    var els = (root || document.body).querySelectorAll('p,li,span,a,label,small,cite,b,strong,em,i,div,dd,dt,td,th,figcaption,blockquote,h4,h5,h6,input,select,textarea,button');
+    for (var i = 0; i < els.length; i++) {
+      var e = els[i];
+      if (e.dataset.fz || e.closest(SKIP)) continue;
+      var own = false;
+      for (var n = e.firstChild; n; n = n.nextSibling) if (n.nodeType === 3 && n.nodeValue.trim().length > 1) { own = true; break; }
+      if (!own && !/^(INPUT|SELECT|TEXTAREA)$/.test(e.tagName)) continue;
+      var cs = getComputedStyle(e), fs = parseFloat(cs.fontSize);
+      var label = cs.textTransform === 'uppercase' || parseFloat(cs.letterSpacing) > 1;
+      var min = label ? 12 : 16;
+      if (fs < min) { e.style.fontSize = min + 'px'; if (!label) e.style.lineHeight = '1.55'; }
+      e.dataset.fz = '1';
+    }
+  }
+  function run() { lift(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run); else run();
+  var t; new MutationObserver(function () { clearTimeout(t); t = setTimeout(run, 120); }).observe(document.body, { childList: true, subtree: true });
+})();
