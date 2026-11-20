@@ -165,6 +165,11 @@ footer{padding-top:30px;padding-bottom:40px;font-size:12px;color:var(--soft);dis
 .boxrow .inbox li{font-size:15px;line-height:1.5;color:var(--soft)}
 .boxrow .inbox li b{display:block;font-family:var(--display);font-weight:400;font-size:22px;color:var(--ink);text-transform:uppercase}
 @media (max-width:700px){.boxrow .inbox{padding-left:0}}
+.skimg{display:block;width:clamp(48px,4.4vw,64px);height:auto;aspect-ratio:1;object-fit:contain;opacity:0;transform:translateY(6px);transition:opacity 1s ease,transform 1s ease}
+.in .skimg,.skimg.in{opacity:1;transform:none}
+.item .mini .skimg{width:clamp(44px,4vw,60px)}
+.item .art .big .skimg{width:30%}
+.dhd .sks .skimg{width:clamp(56px,6vw,90px)}
 </style></head>
 <body>
 <header class="wrap" id="hd"><div class="bar"><a href="/" aria-label="Donutste"><img src="navlogo.webp" alt="Donutste Doughnuts"></a>
@@ -199,8 +204,8 @@ footer{padding-top:30px;padding-bottom:40px;font-size:12px;color:var(--soft);dis
     <a class="lnk" href="https://www.instagram.com/reel/CopvAF3JLu-/" target="_blank" rel="noopener">Watch it on Instagram</a>
   </div>
   <div class="vids">
-    <video src="heart.mp4" poster="heart.jpg" muted loop playsinline preload="metadata" aria-label="The Red Velvet Creme Brulee Heart turning in the light"></video>
-    <video class="b" src="pull.mp4" poster="pull.jpg" muted loop playsinline preload="metadata" aria-label="The heart pulled apart, cream inside"></video>
+    <video src="heart.mp4" poster="heart.jpg" muted loop playsinline autoplay preload="auto" aria-label="The Red Velvet Creme Brulee Heart turning in the light"></video>
+    <video class="b" src="pull.mp4" poster="pull.jpg" muted loop playsinline autoplay preload="auto" aria-label="The heart pulled apart, cream inside"></video>
   </div>
 </section>
 
@@ -243,10 +248,11 @@ var SK={
  drizzle:'<path d="M14 36 q12 -10 24 0 t24 0 t24 0"/><path d="M14 54 q12 -10 24 0 t24 0 t24 0" class="p"/><path d="M14 72 q12 -10 24 0 t24 0 t24 0"/>',
  wheat:'<path d="M50 88 V20"/>'+(function(){var s='';for(var y=28;y<70;y+=10){s+='<path d="M50 '+y+' q-12 -2 -14 -12 q10 0 14 12z"/><path class="p" d="M50 '+(y+4)+' q12 -2 14 -12 q-10 0 -14 12z"/>'}return s})()
 };
-var KEY=[['cinnamon','cinnamon'],['vanilla','vanilla'],['guava','guava'],['cream cheese','cream'],['frosting','cream'],['whipped','cream'],['biscoff','biscoff'],['apple','apple'],['nutmeg','nutmeg'],['date','date'],['toffee','toffee'],['caramel','toffee'],['pumpkin','pumpkin'],['cookie','cookie'],['sprinkle','sprinkles'],['pistachio','pistachio'],['lemon','lemon'],['blueberr','blueberry'],['orange','orange'],['chocolate','chocolate'],['cocoa','chocolate'],['ube','ube'],['strawberr','strawberry'],['coconut','coconut'],['raspberr','berry'],['berry','berry'],['egg','egg'],['parmesan','cheese'],['pepper','pepper'],['garlic','garlic'],['glaze','drizzle'],['drizzle','drizzle']];
-var LABEL={cinnamon:'Cinnamon',vanilla:'Vanilla',guava:'Guava',cream:'Cream',biscoff:'Biscoff',apple:'Apple',nutmeg:'Nutmeg',date:'Date',toffee:'Toffee',pumpkin:'Pumpkin',cookie:'Cookie',sprinkles:'Sprinkles',pistachio:'Pistachio',lemon:'Lemon',blueberry:'Blueberry',orange:'Orange',chocolate:'Chocolate',ube:'Ube',strawberry:'Strawberry',coconut:'Coconut',berry:'Berry',egg:'Egg yolk',cheese:'Parmesan',pepper:'Black pepper',garlic:'Garlic',drizzle:'Glaze',wheat:'Dough'};
-function notesFor(it){var out=[];[it.name,it.desc].forEach(function(src){var t=src.toLowerCase();KEY.forEach(function(k){if(out.length<3&&t.indexOf(k[0])>=0&&out.indexOf(k[1])<0)out.push(k[1])})});if(!out.length)out=['wheat'];return out}
-function svg(k,cls){return '<svg class="sk draw'+(cls?' '+cls:'')+'" viewBox="0 0 100 100" aria-hidden="true">'+SK[k].replace(/<(path|circle|ellipse|rect)/g,'<$1 pathLength="1"')+'</svg>'}
+var KEY=[['sweet potato','sweetpotato'],['key lime','lime'],['\\blimes?\\b','lime'],['dragon ?fruit','dragonfruit'],['br[uû]l[eé]e','brulee'],['mixed berr','mixedberry'],['red velvet','cocoa'],['nog\\b','nog'],['old bay','oldbay'],['sorrel','sorrel'],['ginger','sorrel'],['oreo','oreo'],['cookies (&|and) cream','oreo'],['cookie monster','oreo'],['cream cheese','cream'],['mascarpone','cream'],['biscoff','biscoff'],['speculoos','biscoff'],['sugar cookie','sugarcookie'],['shortbread','shortbread'],['matcha','matcha'],['\\bube\\b','ube'],['guava','guava'],['peach','peach'],['banana','banana'],['carrot','carrot'],['pecan','pecan'],['praline','caramel'],['caramel|carmel','caramel'],['cherr','cherry'],['cranberr','cranberry'],['blueberr','blueberry'],['raspberr','raspberry'],['framboise','raspberry'],['strawberr','strawberry'],['rhubarb','rhubarb'],['pistachio','pistachio'],['kataifi','kataifi'],['hazelnut','hazelnut'],['nutella','hazelnut'],['peanut','peanut'],['cashew','cashew'],['cardamom','cardamom'],['marshmallow|s.mores?\\b','marshmallow'],['espresso|tiramisu|coffee','coffee'],['champagne|mo[eë]t','champagne'],['custard|pudding','custard'],['pumpkin','pumpkin'],['apple','apple'],['lemon','lemon'],['orange','orange'],['coconut','coconut'],['chocolate|brownie','chocolate'],['cocoa','cocoa'],['toffee','toffee'],['\\bdates?\\b','date'],['nutmeg','nutmeg'],['cheddar','cheddar'],['mozzarella','mozzarella'],['parmesan','parmesan'],['bacon','bacon'],['poblano','poblano'],['pepperoni|pizza','pepperoni'],['everything','everything'],['caviar|\\bdill\\b','dill'],['parsley','parsley'],['garlic','garlic'],['black pepper|cracked pepper','pepper'],['egg yolk|\\begg\\b','egg'],['sprinkle','sprinkles'],['cinnamon','cinnamon'],['vanilla','vanilla'],['frosting|whipped','frosting'],['cookie','sugarcookie'],['berr','mixedberry'],['glaze|drizzle|icing','glaze']].map(function(k){return [new RegExp(k[0],'i'),k[1]]});
+var IMGK={cinnamon:1,vanilla:1,guava:1,cream:1,biscoff:1,apple:1,nutmeg:1,date:1,toffee:1,pumpkin:1,sugarcookie:1,sprinkles:1,pistachio:1,lemon:1,blueberry:1,orange:1,chocolate:1,ube:1,strawberry:1,coconut:1,raspberry:1,egg:1,parmesan:1,pepper:1,garlic:1,glaze:1,wheat:1,peach:1,banana:1,sweetpotato:1,carrot:1,pecan:1,cherry:1,cranberry:1,lime:1,matcha:1,oreo:1,marshmallow:1,peanut:1,hazelnut:1,cardamom:1,cheddar:1,mozzarella:1,bacon:1,poblano:1,pepperoni:1,everything:1,dill:1,coffee:1,brulee:1,custard:1,dragonfruit:1,champagne:1,sorrel:1,mixedberry:1,cocoa:1,nog:1,caramel:1,shortbread:1,frosting:1,oldbay:1,parsley:1,rhubarb:1,kataifi:1,cashew:1};
+var LABEL={cinnamon:'Cinnamon',vanilla:'Vanilla',guava:'Guava',cream:'Cream cheese',biscoff:'Biscoff',apple:'Apple',nutmeg:'Nutmeg',date:'Date',toffee:'Toffee',pumpkin:'Pumpkin',sugarcookie:'Cookie',sprinkles:'Sprinkles',pistachio:'Pistachio',lemon:'Lemon',blueberry:'Blueberry',orange:'Orange',chocolate:'Chocolate',ube:'Ube',strawberry:'Strawberry',coconut:'Coconut',raspberry:'Raspberry',egg:'Egg yolk',parmesan:'Parmesan',pepper:'Black pepper',garlic:'Garlic',glaze:'Glaze',wheat:'Dough',peach:'Peach',banana:'Banana',sweetpotato:'Sweet potato',carrot:'Carrot',pecan:'Pecan',cherry:'Cherry',cranberry:'Cranberry',lime:'Key lime',matcha:'Matcha',oreo:'Cookies & cream',marshmallow:'Marshmallow',peanut:'Peanut',hazelnut:'Hazelnut',cardamom:'Cardamom',cheddar:'Cheddar',mozzarella:'Mozzarella',bacon:'Bacon',poblano:'Poblano',pepperoni:'Pepperoni',everything:'Everything',dill:'Dill & caviar',coffee:'Espresso',brulee:'Cr\u00e8me br\u00fbl\u00e9e',custard:'Custard',dragonfruit:'Dragon fruit',champagne:'Champagne',sorrel:'Sorrel & ginger',mixedberry:'Berries',cocoa:'Cocoa',nog:'Eggnog',caramel:'Caramel',shortbread:'Shortbread',frosting:'Frosting',oldbay:'Old Bay',parsley:'Parsley',rhubarb:'Rhubarb',kataifi:'Kataifi',cashew:'Cashew',drizzle:'Glaze',cheese:'Parmesan',berry:'Berries'};
+function notesFor(it){var out=[];[it.name,it.desc||''].forEach(function(src){KEY.forEach(function(k){if(out.length<3&&k[0].test(src)&&out.indexOf(k[1])<0)out.push(k[1])})});if(!out.length)out=['wheat'];return out}
+function svg(k,cls){if(IMGK[k])return '<img class="skimg draw'+(cls?' '+cls:'')+'" src="/menu/sk/'+k+'.webp" alt="" loading="lazy" decoding="async">';if(!SK[k])return '';return '<svg class="sk draw'+(cls?' '+cls:'')+'" viewBox="0 0 100 100" aria-hidden="true">'+SK[k].replace(/<(path|circle|ellipse|rect)/g,'<$1 pathLength="1"')+'</svg>'}
 
 // ---------- menu data: comes from Square at launch ----------
 // At launch: GET /api/menu -> Square Catalog (items + image_ids + categories "Wednesday"/"Thursday"), merged by item name so each flavor shows once with its days.
@@ -387,4 +393,5 @@ document.querySelectorAll('video').forEach(function(v){vio.observe(v)});
 var hd=document.getElementById('hd');function onS(){hd.classList.toggle('s',scrollY>40)}addEventListener('scroll',onS,{passive:true});onS();
 })();
 </script>
+<script src="/nav.js" defer></script>
 </body></html>

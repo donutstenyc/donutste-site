@@ -231,9 +231,9 @@ footer{padding-top:30px;padding-bottom:40px;font-size:12px;color:var(--soft);dis
     <p class="body">We use ceremonial-grade matcha, made fresh for every cup. Each matcha flavor is built with intention: every layer chosen to balance the one before it, so the matcha always comes through.</p>
   </div>
   <div class="vids rv">
-    <figure><video src="matcha-sun.mp4" poster="matcha-sun.jpg" muted loop playsinline preload="metadata"></video></figure>
+    <figure><video src="matcha-sun.mp4" poster="matcha-sun.jpg" muted loop playsinline autoplay preload="auto"></video></figure>
     <figure><img src="m-neon.webp" alt="Layered matcha held in front of the Donutste Doughnuts neon"></figure>
-    <figure><video src="matcha-leaves.mp4" poster="matcha-leaves.jpg" muted loop playsinline preload="metadata"></video></figure>
+    <figure><video src="matcha-leaves.mp4" poster="matcha-leaves.jpg" muted loop playsinline autoplay preload="auto"></video></figure>
   </div>
   <div class="mrow">
     <figure class="rv"><img src="m-leaves.webp" alt="Iced matcha against green leaves"></figure>
@@ -247,7 +247,7 @@ footer{padding-top:30px;padding-bottom:40px;font-size:12px;color:var(--soft);dis
   <h2 class="rv" style="margin-top:22px">Behind<br>the <em>bar.</em></h2>
   <div class="five">
     <figure class="rv"><img src="iced-neon.webp" alt="Iced latte with cold foam under the neon"></figure>
-    <figure class="rv"><video src="bar-neon2.mp4" poster="bar-neon2.jpg" muted loop playsinline preload="metadata"></video></figure>
+    <figure class="rv"><video src="bar-neon2.mp4" poster="bar-neon2.jpg" muted loop playsinline autoplay preload="auto"></video></figure>
     <figure class="rv"><img src="hot.webp" alt="Hot latte with pink dust in a Donutste cup"></figure>
     <figure class="rv"><img src="latte.webp" alt="Iced latte on a stand under the Donutste Coffee neon"></figure>
   </div>
@@ -259,10 +259,10 @@ footer{padding-top:30px;padding-bottom:40px;font-size:12px;color:var(--soft);dis
   <div class="wall">
     <figure class="rv"><img src="c-latte.webp" alt="A customer holding a Donutste iced latte outside"><blockquote>&ldquo;My new favorite iced latte.&rdquo;</blockquote><figcaption>From a customer&rsquo;s story</figcaption></figure>
     <figure class="rv q"><blockquote>&ldquo;Such sweet workers and one of the best matchas I have had in Orlando.&rdquo;</blockquote><figcaption>From a customer&rsquo;s story</figcaption></figure>
-    <figure class="rv"><video src="c-ube.mp4" poster="c-ube.jpg" muted loop playsinline preload="metadata"></video></figure>
+    <figure class="rv"><video src="c-ube.mp4" poster="c-ube.jpg" muted loop playsinline autoplay preload="auto"></video></figure>
     <figure class="rv"><img src="c-banana.webp" alt="A customer holding a Banana Matcha"><blockquote>&ldquo;Been missing this Banana Matcha&hellip; so I had to come back and get one.&rdquo;</blockquote><figcaption>From a customer&rsquo;s story</figcaption></figure>
     <figure class="rv"><img src="c-matcha.webp" alt="A customer holding an iced matcha in the car"></figure>
-    <figure class="rv"><video src="c-berry.mp4" poster="c-berry.jpg" muted loop playsinline preload="metadata"></video><blockquote>&ldquo;4 Berry Matcha.&rdquo;</blockquote><figcaption>From a customer&rsquo;s story</figcaption></figure>
+    <figure class="rv"><video src="c-berry.mp4" poster="c-berry.jpg" muted loop playsinline autoplay preload="auto"></video><blockquote>&ldquo;4 Berry Matcha.&rdquo;</blockquote><figcaption>From a customer&rsquo;s story</figcaption></figure>
     <figure class="rv"><img src="c-pair.webp" alt="Two friends holding an ube latte, a matcha and a cinnamon roll"></figure>
   </div>
 </div></section>
@@ -278,7 +278,7 @@ footer{padding-top:30px;padding-bottom:40px;font-size:12px;color:var(--soft);dis
   <div class="ph rv bgrid">
     <figure class="wide" style="margin:0"><img src="b-four.webp" alt="Four Donutste bottled drinks in a row: vanilla matcha, Fruity Pebbles matcha, Biscoff cold brew latte, ube matcha latte"></figure>
     <figure class="t" style="margin:0"><img src="b-brulee.webp" alt="Donutste Brulee Cold Brew Latte bottle among dozens of bottles"></figure>
-    <figure class="t" style="margin:0"><video src="b-icevid.mp4" poster="b-icevid.jpg" muted loop playsinline preload="metadata"></video></figure>
+    <figure class="t" style="margin:0"><video src="b-icevid.mp4" poster="b-icevid.jpg" muted loop playsinline autoplay preload="auto"></video></figure>
   </div>
 </section>
 
@@ -290,7 +290,7 @@ footer{padding-top:30px;padding-bottom:40px;font-size:12px;color:var(--soft);dis
     <p class="body" style="margin-top:26px">Pre-order your box, and grab a drink to go with it.</p>
     <div class="ctas"><a class="pill" href="/menu/" style="margin-left:0">Pre-order now <i></i></a><a class="ghost" href="/menu/">See the flavors</a></div>
   </div>
-  <div class="ph rv"><video src="b-roll.mp4" poster="b-roll.jpg" muted loop playsinline preload="metadata" style="width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:2px;display:block"></video></div>
+  <div class="ph rv"><video src="b-roll.mp4" poster="b-roll.jpg" muted loop playsinline autoplay preload="auto" style="width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:2px;display:block"></video></div>
 </section>
 
 <footer class="wrap"><span>Welcome Home &middot; Donutste Doughnuts &amp; Coffee</span><span>Lake Mary, Florida</span></footer>
@@ -299,13 +299,14 @@ footer{padding-top:30px;padding-bottom:40px;font-size:12px;color:var(--soft);dis
 (function(){
 var hd=document.getElementById('hd');
 var top=document.getElementById('top');
+var SMALL=Math.min(innerWidth,innerHeight)<700;
 function Build(sec,d){var cv=sec.querySelector('canvas'),cx=cv.getContext('2d'),ol=sec.querySelector('.steps'),pg=sec.querySelector('.prog i'),rb=sec.querySelector('.replay'),run=0,sh=[],loaded=0,m=Math.ceil(d.n/10);
-  for(var i=0;i<m;i++){(function(i){var im=new Image();im.decoding='async';im.onload=function(){im.ok=1;loaded+=Math.min(10,d.n-i*10);if(i===0)draw(0)};im.src=d.dir+'/'+String(i).padStart(2,'0')+'.webp';sh[i]=im})(i)}
-  function draw(i){var q=i;while(q>=0&&!(sh[q/10|0]&&sh[q/10|0].ok))q-=10;if(q<0)return;if((q/10|0)!==(i/10|0))q=(q/10|0)*10+9;var im=sh[q/10|0],j=q%10;cx.clearRect(0,0,540,960);cx.drawImage(im,(j%5)*540,(j/5|0)*960,540,960,0,0,540,960);
+  for(var i=0;i<m;i++){(function(i){var im=new Image();im.decoding='async';im.onload=function(){im.ok=1;loaded+=Math.min(10,d.n-i*10);if(i===0)draw(0)};im.src=(SMALL?d.dir+'s':d.dir)+'/'+String(i).padStart(2,'0')+'.webp';sh[i]=im})(i)}
+  function draw(i){var q=i;while(q>=0&&!(sh[q/10|0]&&sh[q/10|0].ok))q-=10;if(q<0)return;if((q/10|0)!==(i/10|0))q=(q/10|0)*10+9;var im=sh[q/10|0],j=q%10;var fw=SMALL?270:540,fh=SMALL?480:960;cx.clearRect(0,0,540,960);cx.drawImage(im,(j%5)*fw,(j/5|0)*fh,fw,fh,0,0,540,960);
     var s=0;for(var k=0;k<d.seg.length;k++)if(i>=d.seg[k])s=k;[].forEach.call(ol.children,function(li,k){li.classList.toggle('on',k===s)});pg.style.width=(i/(d.n-1)*100)+'%'}
   function play(){rb.classList.remove('show');var my=++run,t0=0,st=performance.now();
-    function tick(t){if(my!==run)return;if(!t0)t0=t;var p=Math.min(1,(t-t0)/d.dur);draw(Math.round(p*(d.n-1)));if(p<1)requestAnimationFrame(tick);else rb.classList.add('show')}
-    (function wait(){if(my!==run)return;if(loaded>=d.n*.9||performance.now()-st>6000)requestAnimationFrame(tick);else setTimeout(wait,120)})()}
+    var lt=0;function tick(t){if(my!==run)return;if(!t0){t0=t;lt=t}var p=Math.min(1,(t-t0)/d.dur),f=Math.round(p*(d.n-1)),sh0=sh[f/10|0];if(!(sh0&&sh0.ok)){t0+=t-lt;lt=t;requestAnimationFrame(tick);return}lt=t;draw(f);if(p<1)requestAnimationFrame(tick);else rb.classList.add('show')}
+    (function wait(){if(my!==run)return;if(loaded>=Math.min(d.n,30)||performance.now()-st>4000)requestAnimationFrame(tick);else setTimeout(wait,100)})()}
   rb.addEventListener('click',play);
   var seen=false;new IntersectionObserver(function(es){if(es[0].isIntersecting&&!seen){seen=true;play()}},{threshold:.45}).observe(sec);
 }
@@ -319,4 +320,5 @@ var vio=new IntersectionObserver(function(es){es.forEach(function(e){var v=e.tar
 document.querySelectorAll('video').forEach(function(v){vio.observe(v)});
 })();
 </script>
+<script src="/nav.js" defer></script>
 </body></html>

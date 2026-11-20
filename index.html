@@ -207,6 +207,8 @@ button.po-day:focus-visible{outline:2px solid var(--pink);outline-offset:4px}
 .bf-row{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;margin-top:clamp(24px,3vw,40px);border-top:1px solid #3A3433;padding-top:clamp(18px,2vw,28px)}
 .bf-row p{margin:0;font-size:clamp(15px,1.3vw,18px)}
 .bfband .hol-cta{background:var(--pink);color:#22130B;padding:18px 30px}
+.holiday{padding-top:clamp(104px,11vw,140px)}
+#holiday[hidden]+.bfband{padding-top:clamp(120px,12vw,170px)}
 </style>
 
 <header>
@@ -393,3 +395,4 @@ button.po-day:focus-visible{outline:2px solid var(--pink);outline-offset:4px}
   document.querySelectorAll('button.po-day').forEach(function(btn){btn.addEventListener('click',function(){document.querySelectorAll('button.po-day').forEach(function(x){x.classList.toggle('on',x===btn);x.setAttribute('aria-selected',x===btn)});});});
 })();
 </script>
+<script src="/nav.js" defer></script>
