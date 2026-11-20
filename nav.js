@@ -89,3 +89,21 @@
   addEventListener('scroll', function () { if (!tick) { tick = true; requestAnimationFrame(upd); } }, { passive: true });
   upd();
 })();
+
+// Desktop: a larger, easier-to-read menu bar, with a solid light background once the page scrolls.
+(function () {
+  if (!matchMedia('(min-width:901px)').matches) return;
+  var h = document.querySelector('header'); if (!h) return;
+  var st = document.createElement('style');
+  st.textContent =
+    'header nav{font-size:16px!important;gap:clamp(22px,2.4vw,40px)!important;letter-spacing:.01em}' +
+    'header nav a{font-weight:500;opacity:1}' +
+    'header .pill{font-size:15px!important;padding:11px 12px 11px 20px!important}' +
+    'header{transition:background .3s,box-shadow .3s}' +
+    'header.dk-s{background:rgba(248,241,234,.96)!important;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:0 1px 0 rgba(34,19,11,.08)}' +
+    'header.dk-s nav, header.dk-s nav a{color:#22130B!important;opacity:1!important}' +
+    'header.dk-s nav a.on{color:#E8608A!important}';
+  document.head.appendChild(st);
+  function upd() { h.classList.toggle('dk-s', scrollY > 40); }
+  addEventListener('scroll', upd, { passive: true }); upd();
+})();
