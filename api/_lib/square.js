@@ -106,6 +106,7 @@ async function getMenu(debug) {
     const days = [...new Set(catIds.map((c) => dayOfCat[c]).filter(Boolean))];
     // Bottled drinks: Square categories starting with "Bottled" (Bottled Coffee / Matcha / Refresher / Drinks).
     // They are not tied to one day: switched on for Square Online, they show as add-ons on every regular pickup day.
+    if (debug === 'cat') (globalThis.__all = globalThis.__all || []).push({ n: d.name, c: catIds.map((c) => cats[c]).filter(Boolean), d: (d.description_plaintext || d.description || '').trim(), v: d.ecom_visibility });
     const isBottle = catIds.some((c) => /^bottled\b/i.test((cats[c] || '').trim()));
     if (isBottle && !days.length) days.push('*B');
     if (!days.length) { if (debug && d.ecom_visibility === 'VISIBLE') (globalThis.__nod = globalThis.__nod || []).push(d.name + ' [' + catIds.map((c) => cats[c]).join(', ') + ']'); return; }
@@ -198,6 +199,7 @@ async function getMenu(debug) {
   }));
   items.length = 0; uniq.forEach((x) => { const sd = DAYS.find((d) => d.key === x.days[0]); if (sd && sd.special && !special[sd.key]) return; items.push(x); });
   const noDay = debug ? (globalThis.__nod || []) : undefined; globalThis.__nod = [];
+  if (debug === 'cat') { const all = globalThis.__all || []; globalThis.__all = []; return { all }; }
   return {
     popup,
     noDay, cats: debug ? Object.values(cats) : undefined,

@@ -4,7 +4,7 @@ const { getMenu, send } = require('./_lib/square');
 const popup = require('../popup.json');
 module.exports = async (req, res) => {
   try {
-    const m = await getMenu(req.query && req.query.debug === '1');
+    const m = await getMenu(req.query && (req.query.debug === 'cat' ? 'cat' : req.query.debug === '1'));
     if (popup && popup.date) m.popup = popup; // manual override
     send(res, 200, m, 'public, s-maxage=30, stale-while-revalidate=30');
   } catch (e) {
