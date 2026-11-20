@@ -155,6 +155,9 @@ p.body{color:var(--soft);max-width:44ch;font-size:clamp(15px,1.15vw,17px)}
 footer{padding-top:30px;padding-bottom:40px;font-size:12px;color:var(--soft);display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;border-top:1px solid var(--hair)}
 .rv{opacity:0;transform:translateY(26px);transition:opacity 1s ease,transform 1s ease}.rv.in{opacity:1;transform:none}
 @media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}}
+.bnote{font-family:var(--display);font-size:clamp(22px,2.4vw,32px);line-height:1.25;padding:22px 24px;margin:0 0 34px;border:1px solid var(--hair);border-left:4px solid #E0457B;background:rgba(224,69,123,.06);border-radius:2px}.bnote b{display:block;font-weight:400;font-style:italic;color:#C2336A;margin-bottom:8px}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:clamp(12px,1.6vw,22px)}.duo img,.duo video{width:100%;aspect-ratio:9/14;object-fit:cover;border-radius:2px;display:block}
+.bottle{border-bottom:1px solid var(--hair)}@media (max-width:900px){.home.bottle .ph{order:2}}
 </style></head>
 <body>
 <header class="wrap" id="hd"><div class="bar"><a href="/" aria-label="Donutste"><img src="logo.webp" alt="Donutste Doughnuts"></a>
@@ -190,8 +193,25 @@ footer{padding-top:30px;padding-bottom:40px;font-size:12px;color:var(--soft);dis
   </div>
 </section>
 
-<section class="ingr wrap" id="ingredients">
+<section class="home bottle wrap" id="bottle">
   <span class="num">02</span>
+  <div class="rv">
+    <div class="bnote" role="note"><b>Right now, it&rsquo;s bottles only.</b> We currently only have bottled drinks available as we rework our coffee program. Thank you for your patience while we make it even better.</div>
+    <div class="kicker">Take it home</div>
+    <h2 style="margin-top:22px">Our coffee,<br><em>by the bottle.</em></h2>
+    <p class="body" style="margin-top:26px">Our lattes and matchas, bottled fresh and ready for your fridge. Flavors rotate with the season, so grab one with your box.</p>
+    <div class="ctas" id="bcta"><a class="pill" href="/menu/" style="margin-left:0">Pre-order a bottle <i></i></a><a class="ghost" href="#bflav">See the flavors</a></div>
+    <div id="bflav" class="bflav" hidden><div class="kicker">Bottled this week</div><ul id="bfl"></ul></div>
+  </div>
+  <div class="ph rv bgrid">
+    <figure class="wide" style="margin:0"><img src="b-four.webp" alt="Four Donutste bottled drinks in a row: vanilla matcha, Fruity Pebbles matcha, Biscoff cold brew latte, ube matcha latte"></figure>
+    <figure class="t" style="margin:0"><img src="b-brulee.webp" alt="Donutste Brulee Cold Brew Latte bottle among dozens of bottles"></figure>
+    <figure class="t" style="margin:0"><video src="b-icevid.mp4" poster="b-icevid.jpg" muted loop playsinline autoplay preload="auto"></video></figure>
+  </div>
+</section>
+
+<section class="ingr wrap" id="ingredients">
+  <span class="num">03</span>
   <div class="rv">
     <div class="kicker">What goes in</div>
     <h2 style="margin-top:22px">Only the<br><em>best.</em></h2>
@@ -208,7 +228,7 @@ footer{padding-top:30px;padding-bottom:40px;font-size:12px;color:var(--soft);dis
 </section>
 
 <section class="syrup wrap" id="program">
-  <span class="num">03</span>
+  <span class="num">04</span>
   <div class="top rv">
     <div>
       <div class="kicker">The drink program</div>
@@ -223,7 +243,7 @@ footer{padding-top:30px;padding-bottom:40px;font-size:12px;color:var(--soft);dis
 </section>
 
 <section class="matcha" id="matcha"><div class="wrap">
-  <span class="num">04</span>
+  <span class="num">05</span>
   <div class="top rv">
     <div>
       <div class="kicker">The matcha program</div>
@@ -243,7 +263,7 @@ footer{padding-top:30px;padding-bottom:40px;font-size:12px;color:var(--soft);dis
 </div></section>
 
 <section class="bar2 wrap" id="bar">
-  <span class="num">05</span>
+  <span class="num">06</span>
   <div class="kicker rv">The bar</div>
   <h2 class="rv" style="margin-top:22px">Behind<br>the <em>bar.</em></h2>
   <div class="five">
@@ -268,31 +288,17 @@ footer{padding-top:30px;padding-bottom:40px;font-size:12px;color:var(--soft);dis
   </div>
 </div></section>
 
-<section class="home bottle wrap" id="bottle">
-  <span class="num">07</span>
-  <div class="rv">
-    <div class="kicker">Take it home</div>
-    <h2 style="margin-top:22px">Our coffee,<br><em>by the bottle.</em></h2>
-    <p class="body" style="margin-top:26px">Our lattes and matchas, bottled fresh and ready for your fridge. Flavors rotate with the season, so grab one with your box.</p>
-    <div class="ctas" id="bcta"><a class="pill" href="/menu/" style="margin-left:0">Pre-order a bottle <i></i></a><a class="ghost" href="#bflav">See the flavors</a></div>
-    <div id="bflav" class="bflav" hidden><div class="kicker">Bottled this week</div><ul id="bfl"></ul></div>
-  </div>
-  <div class="ph rv bgrid">
-    <figure class="wide" style="margin:0"><img src="b-four.webp" alt="Four Donutste bottled drinks in a row: vanilla matcha, Fruity Pebbles matcha, Biscoff cold brew latte, ube matcha latte"></figure>
-    <figure class="t" style="margin:0"><img src="b-brulee.webp" alt="Donutste Brulee Cold Brew Latte bottle among dozens of bottles"></figure>
-    <figure class="t" style="margin:0"><video src="b-icevid.mp4" poster="b-icevid.jpg" muted loop playsinline autoplay preload="auto"></video></figure>
-  </div>
-</section>
+
 
 <section class="home wrap" id="visit">
-  <span class="num">08</span>
+  <span class="num">07</span>
   <div class="rv">
     <div class="kicker">Come thirsty</div>
     <h2 style="margin-top:22px">Pair it with<br><em>a roll.</em></h2>
     <p class="body" style="margin-top:26px">Pre-order your box, and grab a drink to go with it.</p>
     <div class="ctas"><a class="pill" href="/menu/" style="margin-left:0">Pre-order now <i></i></a><a class="ghost" href="/menu/">See the flavors</a></div>
   </div>
-  <div class="ph rv"><video src="b-roll.mp4" poster="b-roll.jpg" muted loop playsinline autoplay preload="auto" style="width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:2px;display:block"></video></div>
+  <div class="ph rv duo"><img src="cheers.webp" alt="Four Donutste iced drinks raised in a toast in front of the pink Donutste neon sign"><video src="b-roll.mp4" poster="b-roll.jpg" muted loop playsinline autoplay preload="auto"></video></div>
 </section>
 
 <footer class="wrap"><span>Welcome Home &middot; Donutste Doughnuts &amp; Coffee</span><span>Lake Mary, Florida</span></footer>

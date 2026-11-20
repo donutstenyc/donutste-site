@@ -36,7 +36,11 @@
 // small uppercase labels to at least 12px. Runs again when pages add content (menu, crate).
 (function () {
   if (!matchMedia('(max-width:700px)').matches) return;
-  var SKIP = '#ctl, svg, canvas, .mnav-btn, .pads, .meter';
+  var SKIP = '#ctl, svg, canvas, .mnav-btn, .pads, .meter, header .pill';
+  // Header "Pre-order now" stays on one line on phones.
+  var hs = document.createElement('style');
+  hs.textContent = 'html,body{overflow-x:clip}header .pill{white-space:nowrap!important;font-size:14px!important;line-height:1.2!important;padding:9px 8px 9px 14px!important;gap:8px!important;flex:none}';
+  document.head.appendChild(hs);
   function lift(root) {
     var els = (root || document.body).querySelectorAll('p,li,span,a,label,small,cite,b,strong,em,i,div,dd,dt,td,th,figcaption,blockquote,h4,h5,h6,input,select,textarea,button');
     for (var i = 0; i < els.length; i++) {
@@ -55,4 +59,33 @@
   function run() { lift(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run); else run();
   var t; new MutationObserver(function () { clearTimeout(t); t = setTimeout(run, 120); }).observe(document.body, { childList: true, subtree: true });
+})();
+
+// Phones: once the page scrolls, give the header the colour of whatever is under it,
+// so the logo and buttons never sit on top of text or pictures.
+(function () {
+  if (!matchMedia('(max-width:900px)').matches) return;
+  var h = document.querySelector('header'); if (!h) return;
+  function bgAt(y) {
+    var el = document.elementFromPoint(innerWidth / 2, y);
+    while (el && el !== document.documentElement) {
+      if (h.contains(el)) { el = null; break; }
+      var c = getComputedStyle(el).backgroundColor;
+      if (c && c !== 'transparent' && !/rgba\(.*,\s*0\)$/.test(c)) return c;
+      el = el.parentElement;
+    }
+    return getComputedStyle(document.body).backgroundColor;
+  }
+  var own = null, tick = false;
+  function upd() {
+    tick = false;
+    if (own === null) { h.style.background = ''; var c0 = getComputedStyle(h).backgroundColor; own = !(c0 === 'transparent' || /rgba\(.*,\s*0\)$/.test(c0)); }
+    if (own) return;
+    if (scrollY < 40) { h.style.background = ''; h.style.boxShadow = ''; return; }
+    h.style.pointerEvents = 'none'; var c = bgAt(h.getBoundingClientRect().bottom + 6); h.style.pointerEvents = '';
+    h.style.background = c; h.style.boxShadow = '0 1px 0 rgba(0,0,0,.06)';
+  }
+  h.style.transition = 'background .3s';
+  addEventListener('scroll', function () { if (!tick) { tick = true; requestAnimationFrame(upd); } }, { passive: true });
+  upd();
 })();
