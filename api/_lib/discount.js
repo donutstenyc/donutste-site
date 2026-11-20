@@ -10,7 +10,8 @@ async function findDiscount(code, locationId) {
       if (found || o.is_deleted) return;
       const d = o.discount_data || {};
       const here = (o.present_at_all_locations !== false || (o.present_at_location_ids || []).includes(locationId)) && !(o.absent_at_location_ids || []).includes(locationId);
-      if (here && (d.name || '').trim().toLowerCase() === c && /^FIXED_/.test(d.discount_type || '')) found = { id: o.id, name: d.name };
+      const nm = (d.name || '').trim().toLowerCase(); const tail = nm.split(/\s[—–-]\s/).pop().trim();
+      if (here && (nm === c || tail === c) && /^FIXED_/.test(d.discount_type || '')) found = { id: o.id, name: d.name };
     });
     cursor = j.cursor;
   } while (cursor && !found);
