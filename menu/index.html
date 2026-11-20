@@ -298,7 +298,7 @@ function render(){
   bagUI();
 }
 var sio=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){var d=e.target.closest('.dsec').id.slice(2);drawn[d]=1;e.target.querySelectorAll('.draw').forEach(function(s,i){setTimeout(function(){s.classList.add('in')},i*200)});sio.unobserve(e.target)}})},{threshold:.4});
-document.getElementById('jump').innerHTML=Object.keys(DAYS).map(function(d){return '<a href="#d-'+d+'">'+DAYS[d].name+'</a>'}).join('');
+function jumpUI(){document.getElementById('jump').innerHTML=Object.keys(DAYS).map(function(d){return '<a href="#d-'+d+'">'+DAYS[d].name+'</a>'}).join('')}jumpUI();
 var toast=document.getElementById('toast');
 function change(day,n,d){
   if(box.day&&box.day!==day&&boxCount()){document.getElementById('toastt').textContent='Your box is for '+DAYS[box.day].name+' pickup. Check out first, or start a new box for '+DAYS[day].name+'.';toast.classList.add('show');return}
@@ -352,9 +352,10 @@ document.getElementById('cobtn').addEventListener('click',function(e){e.preventD
     .catch(function(x){err.textContent=(x&&x.msg)||'Something went wrong. Please try again.';payBtn.disabled=false;payBtn.style.opacity=1})});
 });
 if(LIVE)fetch('/api/menu').then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(m){
-  ITEMS=m.items||[];Object.keys(m.hours||{}).forEach(function(k){if(DAYS[k])DAYS[k].hours=m.hours[k]});
-  ['Wed','Thu','Sat'].forEach(function(k){if(!m.hours||!m.hours[k])DAYS[k].hours='Pickup hours posted soon'});
-  if(m.address)['Wed','Thu','Sat'].forEach(function(k){DAYS[k].addr=m.address});
+  ITEMS=m.items||[];var H=m.hours||{};
+  // Days come from Square: any weekday with pickup hours or a day category with items gets its own section.
+  if(m.days&&m.days.length){var ND={};m.days.forEach(function(x){ND[x.key]=x.popup?{name:x.name,popup:true}:{name:x.name,dow:x.dow,hours:H[x.key]||'Pickup hours posted soon',addr:m.address||''}});DAYS=ND;jumpUI()}
+  else Object.keys(DAYS).forEach(function(k){if(!DAYS[k].popup){DAYS[k].hours=H[k]||'Pickup hours posted soon';if(m.address)DAYS[k].addr=m.address}});
   POPUP=m.popup||null;LOADING=false;render();goHash()}).catch(function(){LOADING=false;render()});
 var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.12});
 document.getElementById('herorow').innerHTML=['cinnamon','vanilla','guava','biscoff'].map(function(k){return '<figure>'+svg(k)+'<figcaption>'+LABEL[k]+'</figcaption></figure>'}).join('');

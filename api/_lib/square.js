@@ -27,14 +27,18 @@ const LOCATION_ID = () => process.env.SQUARE_LOCATION_ID;
 const POPUP_LOCATION_ID = () => process.env.SQUARE_POPUP_LOCATION_ID || process.env.SQUARE_LOCATION_ID;
 const uid = () => (globalThis.crypto && crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2));
 
-// Day sections on the Menu page. A Square category whose name matches one of these fills that section.
+// Day sections on the Menu page. A Square category whose name starts with a weekday (e.g. "Friday Cinnamon Rolls")
+// fills that day's section. A weekday shows on the site when the main location has hours that day OR items in its category.
 const DAYS = [
+  { key: 'Mon', name: 'Monday', dow: 1, match: /^mon(day)?\b/i, sq: 'MON' },
+  { key: 'Tue', name: 'Tuesday', dow: 2, match: /^tue(s(day)?)?\b/i, sq: 'TUE' },
   { key: 'Wed', name: 'Wednesday', dow: 3, match: /^wed(nesday)?\b/i, sq: 'WED' },
   { key: 'Thu', name: 'Thursday', dow: 4, match: /^thu(rs(day)?)?\b/i, sq: 'THU' },
+  { key: 'Fri', name: 'Friday', dow: 5, match: /^fri(day)?\b/i, sq: 'FRI' },
   { key: 'Sat', name: 'Saturday', dow: 6, match: /^sat(urday)?\b/i, sq: 'SAT' },
+  { key: 'Sun', name: 'Sunday', dow: 0, match: /^sun(day)?\b/i, sq: 'SUN' },
   { key: 'Pop', name: 'Pop-up', popup: true, match: /^(rotating\s+)?pop[\s-]?ups?$/i },
 ];
-
 async function listAll(types) {
   let cursor, out = [];
   do {
@@ -167,7 +171,8 @@ async function getMenu(debug) {
     hours,
     timezone: L.timezone || 'America/New_York',
     address: [a.address_line_1, a.address_line_2, a.locality].filter(Boolean).join(', '),
-    days: DAYS.map(({ key, name, dow, popup }) => ({ key, name, dow, popup: !!popup })),
+    days: DAYS.filter((d) => d.popup || hours[d.key] || items.some((i) => i.days.includes(d.key)))
+      .map(({ key, name, dow, popup }) => ({ key, name, dow, popup: !!popup })),
   };
 }
 

@@ -74,10 +74,10 @@ h1,h2{font-family:var(--display);font-weight:400;text-transform:uppercase;font-s
 .po-cta i{width:22px;height:22px;border-radius:50%;background:var(--pink);display:grid;place-items:center;transition:transform .3s}
 .po-cta i::after{content:"";width:6px;height:6px;border-top:1.5px solid #fff;border-right:1.5px solid #fff;transform:translateX(-1px) rotate(45deg)}
 .po-day:hover .po-date{color:var(--pink)}
-.po-days.po4{grid-column:1/-1;grid-template-columns:repeat(4,1fr)}
+.po-days.po4{grid-column:1/-1;grid-template-columns:repeat(var(--n,4),1fr)}
 .po4 .po-day{padding:28px 22px 32px 0;color:var(--paper)}.po4 .po-day+.po-day{padding-left:22px;border-left:1px solid #3A3433}
 .po4 .po-date{font-size:clamp(40px,4.4vw,72px)}
-@media (max-width:820px){.po-days.po4{grid-template-columns:1fr 1fr}.po4 .po-day:nth-child(3){padding-left:0;border-left:0}}
+@media (max-width:820px){.po-days.po4{grid-template-columns:1fr 1fr}.po4 .po-day:nth-child(odd){padding-left:0;border-left:0}}
 .po-info{grid-column:1/-1;display:grid;grid-template-columns:1fr 1.2fr;gap:clamp(40px,6vw,96px);padding-top:clamp(40px,5vw,72px);border-top:1px solid #3A3433}
 .po-info p{margin-top:14px;color:#B9B1AE;font-size:15px;max-width:52ch}
 .po-info p.po-addr{color:var(--paper);font-family:var(--display);font-size:clamp(24px,2.4vw,34px);line-height:1.15;text-transform:uppercase}
@@ -201,7 +201,7 @@ button.po-day:focus-visible{outline:2px solid var(--pink);outline-offset:4px}
       <p class="slogan">Welcome Home</p>
       <h1>Pre-order now.</h1>
     </div>
-    <div class="po-days po4" aria-label="Pickup days">
+    <div class="po-days po4" id="podays" aria-label="Pickup days">
       <a class="po-day" href="/menu/#d-Wed"><span class="po-label">Wednesday pickup</span><span class="po-date" id="wed">&mdash;</span><span class="po-cta">See the menu <i></i></span></a>
       <a class="po-day" href="/menu/#d-Thu"><span class="po-label">Thursday pickup</span><span class="po-date" id="thu">&mdash;</span><span class="po-cta">See the menu <i></i></span></a>
       <a class="po-day" href="/menu/#d-Sat"><span class="po-label">Saturday pickup</span><span class="po-date" id="sat">&mdash;</span><span class="po-cta">See the menu <i></i></span></a>
@@ -342,6 +342,11 @@ button.po-day:focus-visible{outline:2px solid var(--pink);outline-offset:4px}
   function next(dow){var d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()+((dow-d.getDay()+7)%7||7));return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});}
   document.getElementById('wed').textContent=next(3);var _s=document.getElementById('sat');if(_s)_s.textContent=next(6);
   document.getElementById('thu').textContent=next(4);
+  // Live: pickup day cards follow Square (same days as the Menu page).
+  if(!/claude|^$|localhost/.test(location.hostname)&&location.protocol!=='file:')fetch('/api/menu').then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(m){
+    if(!m.days||!m.days.length)return;var el=document.getElementById('podays');
+    el.innerHTML=m.days.map(function(x){return x.popup?'<a class="po-day" href="/menu/#d-Pop"><span class="po-label">Pop-up</span><span class="po-date">'+(m.popup&&m.popup.date?new Date(m.popup.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}):'Varies')+'</span><span class="po-cta">Where next <i></i></span></a>':'<a class="po-day" href="/menu/#d-'+x.key+'"><span class="po-label">'+x.name+' pickup</span><span class="po-date">'+next(x.dow)+'</span><span class="po-cta">See the menu <i></i></span></a>'}).join('');
+    el.style.setProperty('--n',Math.min(m.days.length,5));}).catch(function(){});
   document.querySelectorAll('button.po-day').forEach(function(btn){btn.addEventListener('click',function(){document.querySelectorAll('button.po-day').forEach(function(x){x.classList.toggle('on',x===btn);x.setAttribute('aria-selected',x===btn)});});});
 })();
 </script>
