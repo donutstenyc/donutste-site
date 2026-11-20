@@ -6,7 +6,7 @@ module.exports = async (req, res) => {
   try {
     const m = await getMenu(req.query && req.query.debug === '1');
     if (popup && popup.date) m.popup = popup; // manual override
-    send(res, 200, m, 'public, s-maxage=60, stale-while-revalidate=300');
+    send(res, 200, m, 'public, s-maxage=30, stale-while-revalidate=30');
   } catch (e) {
     console.error('menu', e.message);
     send(res, 502, { error: 'Menu unavailable' });
