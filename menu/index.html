@@ -171,6 +171,9 @@ footer{padding-top:30px;padding-bottom:40px;font-size:12px;color:var(--soft);dis
 .item .mini .skimg{width:clamp(44px,4vw,60px)}
 .item .art .big .skimg{width:30%}
 .dhd .sks .skimg{width:clamp(56px,6vw,90px)}
+.dhd{grid-template-columns:minmax(0,1fr)!important;align-items:start}.dhd h2{overflow-wrap:anywhere}.dhd .sks{flex-wrap:wrap;margin-top:clamp(6px,1vw,14px)}
+.item .story{margin:12px 0 0;max-width:58ch;font-family:var(--display);font-style:italic;font-size:clamp(19px,1.5vw,23px);line-height:1.35;color:var(--ink)}
+.item .desc{margin:12px 0 0;max-width:58ch;color:var(--soft);font-size:clamp(15px,1.1vw,17px);line-height:1.55}
 </style></head>
 <body>
 <header class="wrap" id="hd"><div class="bar"><a href="/" aria-label="Donutste"><img src="navlogo.webp" alt="Donutste Doughnuts"></a>
@@ -297,16 +300,16 @@ function boxItems(){return ITEMS.filter(function(it){return box.q[it.name]&&it.d
 function boxTotal(){var t=0;boxItems().forEach(function(it){t+=(box.q[it.name]||0)*it.price});return t}
 function ctl(it,d){if(it.soldOut)return '<span class="add" style="opacity:.45;cursor:default">Sold out</span>';var q=box.day===d?(box.q[it.name]||0):0;return q?'<span class="step" data-d="'+d+'" data-n="'+it.name+'"><button type="button" data-a="-1" aria-label="Remove one">&minus;</button><span>'+q+'</span><button type="button" data-a="1" aria-label="Add one">+</button></span>':'<button type="button" class="add" data-d="'+d+'" data-n="'+it.name+'">Add</button>'}
 function rowHTML(it,i,d){var n=notesFor(it);
-  return '<article class="item in" tabindex="0" aria-expanded="false"><div class="top"><span class="no">'+String(i+1).padStart(2,'0')+'</span><div><h3>'+it.name+'</h3><div class="notes">'+n.map(function(k){return LABEL[k]}).join(' &middot; ')+'</div>'+(it.tag?'<div class="days"><span class="tag">'+it.tag+'</span></div>':'')+'</div>'+
+  return '<article class="item in" tabindex="0" aria-expanded="false"><div class="top"><span class="no">'+String(i+1).padStart(2,'0')+'</span><div><h3>'+it.name+'</h3><div class="notes">'+n.map(function(k){return LABEL[k]}).join(' &middot; ')+'</div>'+(it.desc&&!/\bbox\b/i.test(it.name)?'<p class="desc">'+String(it.desc).replace(/\n+/g,' ')+'</p>':'')+(it.tag?'<div class="days"><span class="tag">'+it.tag+'</span></div>':'')+'</div>'+
   '<div class="rt"><div class="mini">'+n.map(function(k){return svg(k)}).join('')+'</div><span class="price">'+money(it.price)+'</span><span class="c">'+ctl(it,d)+'</span></div></div>'+
   '<div class="more"><div><div class="inner"><div class="art">'+(it.img?'<img src="'+it.img+'" alt="'+it.name+'" loading="lazy">':'<div class="big">'+n.map(function(k){return svg(k,'in')}).join('')+'</div>')+'</div>'+
-  '<div class="txt"><h4>The flavor</h4><p>'+String(it.desc||'').replace(/\n+/g,'<br>')+'</p><h4>Notes</h4><ul>'+n.map(function(k){return '<li>'+LABEL[k]+'</li>'}).join('')+'</ul>'+(it.chef?'<h4>Chef&rsquo;s note</h4><p class="chef">'+it.chef+'</p>':'')+(it.soldOut?'':'<button type="button" class="pill big add2" data-d="'+d+'" data-n="'+it.name+'">Add to box <i></i></button>')+'</div></div></div></div></article>'}
+  '<div class="txt">'+(/\bbox\b/i.test(it.name)?'<h4>The flavor</h4><p>'+String(it.desc||'').replace(/\n+/g,'<br>')+'</p>':'')+'<h4>Notes</h4><ul>'+n.map(function(k){return '<li>'+LABEL[k]+'</li>'}).join('')+'</ul>'+(it.chef?'<h4>Chef&rsquo;s note</h4><p class="chef">'+it.chef+'</p>':'')+(it.soldOut?'':'<button type="button" class="pill big add2" data-d="'+d+'" data-n="'+it.name+'">Add to box <i></i></button>')+'</div></div></div></div></article>'}
 var SEL={};
 function boxContents(desc){return String(desc||'').split(/\n+/).map(function(l){return l.trim()}).filter(function(l){return l&&!/pick-?\s?up|box of|substitut/i.test(l)}).map(function(l){var m=l.match(/^([^:\-–]{2,60}?)\s*[:\-–]\s+(.*)$/);return '<li>'+(m?'<b>'+m[1]+'</b> '+m[2]:l)+'</li>'}).join('')}
 function boxRowHTML(it,opts,i,d){var sel=opts.filter(function(o){return o.name===SEL[it.group]})[0]||opts.filter(function(o){return !o.soldOut})[0]||opts[0];SEL[it.group]=sel.name;
   var c=boxContents(it.desc);
   return '<article class="item in boxrow"><div class="top"><span class="no">'+String(i+1).padStart(2,'0')+'</span><div><h3>'+it.group+'</h3>'+
-  '<div class="opts" role="radiogroup" aria-label="How many boxes">'+opts.map(function(o){return '<button type="button" role="radio" aria-checked="'+(o===sel)+'" class="opt'+(o===sel?' on':'')+'" data-g="'+it.group+'" data-n="'+o.name+'"'+(o.soldOut?' disabled':'')+'>'+o.opt.replace(/^1 Box/i,'1 box').replace(/Boxes/,'boxes')+(o.soldOut?' (sold out)':'')+'</button>'}).join('')+'</div></div>'+
+  (it.chef?'<p class="story">'+it.chef+'</p>':'')+'<div class="opts" role="radiogroup" aria-label="How many boxes">'+opts.map(function(o){return '<button type="button" role="radio" aria-checked="'+(o===sel)+'" class="opt'+(o===sel?' on':'')+'" data-g="'+it.group+'" data-n="'+o.name+'"'+(o.soldOut?' disabled':'')+'>'+o.opt.replace(/^1 Box/i,'1 box').replace(/Boxes/,'boxes')+(o.soldOut?' (sold out)':'')+'</button>'}).join('')+'</div></div>'+
   '<div class="rt"><span class="price">'+money(sel.price)+'</span><span class="c">'+ctl(sel,d)+'</span></div></div>'+
   (c?'<div class="inbox"><h4>In the box</h4><ul>'+c+'</ul></div>':'')+'</article>'}
 var drawn={};

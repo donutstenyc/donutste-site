@@ -78,7 +78,7 @@ function cleanName(raw) {
 
 // Builds the live menu: items per day + pickup hours from the location's business hours.
 // Chef's notes (approved by V): chef-notes.json, keyed by flavor name. Matched loosely to Square names.
-const normName = (n) => String(n || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+const normName = (n) => String(n || '').replace(/\s*\u00b7.*$/, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
   .replace(/\([^)]*\)/g, ' ').replace(/\s*[-–]\s*(pop\s*-?\s*up|(mon|tue|wed|thu|fri|sat|sun)[a-z]*\s+(pick|pre)).*$/i, ' ').replace(/\brolls\b/g, 'roll').replace(/\bbottled\b/g, ' ').replace(/frutty/g, 'fruity').replace(/[^a-z0-9]+/g, '');
 let CHEF = null;
 function chefFor(raw) {
