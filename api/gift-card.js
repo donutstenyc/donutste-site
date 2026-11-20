@@ -1,6 +1,7 @@
 // Sells a Donutste digital gift card for the exact amount chosen ($10–$500).
 // 1) charge the card  2) create a DIGITAL gift card  3) ACTIVATE it for that amount.
 const { sq, LOCATION_ID, uid, send, readBody } = require('./_lib/square');
+const { giftBonus } = require('./_lib/promo');
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return send(res, 405, { error: 'POST only' });
   try {
@@ -19,18 +20,26 @@ module.exports = async (req, res) => {
       type: 'ACTIVATE', location_id: LOCATION_ID(), gift_card_id: gc.gift_card.id,
       activate_activity_details: { amount_money: money, buyer_payment_instrument_ids: [pay.payment.id] },
     } } });
+    // Promo bonus (e.g. Black Friday: $10 on every $50) is loaded onto the same card.
+    const bonus = giftBonus(amt);
+    if (bonus > 0) {
+      await sq('/v2/gift-cards/activities', { method: 'POST', body: { idempotency_key: uid(), gift_card_activity: {
+        type: 'ADJUST_INCREMENT', location_id: LOCATION_ID(), gift_card_id: gc.gift_card.id,
+        adjust_increment_activity_details: { amount_money: { amount: bonus, currency: 'USD' }, reason: 'PROMOTION' },
+      } } }).catch((e) => console.error('gift bonus', e.message));
+    }
     const gan = gc.gift_card.gan;
     // Optional email to the recipient/buyer through Resend (only if RESEND_API_KEY is set).
     if (process.env.RESEND_API_KEY) {
       const to = [toEmail || buyerEmail].filter(Boolean);
       const html = '<div style="font-family:Georgia,serif;color:#22130B"><h1 style="font-weight:400">A Donutste gift card' + (toName ? ' for ' + esc(toName) : '') + '</h1>' +
-        '<p style="font-size:28px">$' + (amt / 100).toFixed(2) + '</p><p>Card number<br><b style="font-size:20px;letter-spacing:2px">' + gan.replace(/(\d{4})/g, '$1 ').trim() + '</b></p>' +
+        '<p style="font-size:28px">$' + ((amt + bonus) / 100).toFixed(2) + '</p>' + (bonus ? '<p>Includes a $' + (bonus / 100).toFixed(2) + ' Black Friday bonus.</p>' : '') + '<p>Card number<br><b style="font-size:20px;letter-spacing:2px">' + gan.replace(/(\d{4})/g, '$1 ').trim() + '</b></p>' +
         (message ? '<p><i>' + esc(message) + '</i>' + (buyerName ? '<br>— ' + esc(buyerName) : '') + '</p>' : '') +
         '<p>Use it at checkout on donutste.com or show it at the counter.<br>Welcome home.</p></div>';
       await fetch('https://api.resend.com/emails', { method: 'POST', headers: { Authorization: 'Bearer ' + process.env.RESEND_API_KEY, 'Content-Type': 'application/json' },
         body: JSON.stringify({ from: process.env.MAIL_FROM || 'Donutste <orders@donutste.com>', to, cc: toEmail && buyerEmail !== toEmail ? [buyerEmail] : undefined, subject: 'Your Donutste gift card', html }) }).catch(() => {});
     }
-    send(res, 200, { ok: true, gan, cents: amt, receiptUrl: pay.payment.receipt_url });
+    send(res, 200, { ok: true, gan, cents: amt, bonusCents: bonus, receiptUrl: pay.payment.receipt_url });
   } catch (e) {
     console.error('gift-card', e.message, JSON.stringify(e.square || ''));
     const card = e.square && e.square.find((x) => x.category === 'PAYMENT_METHOD_ERROR');

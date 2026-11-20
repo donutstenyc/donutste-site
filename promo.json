@@ -1,0 +1,9 @@
+{
+  "giftBonus": {
+    "title": "Black Friday gift card deal",
+    "start": "2026-11-20",
+    "end": "2026-11-30",
+    "every": 50,
+    "bonus": 10
+  }
+}
