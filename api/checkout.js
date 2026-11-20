@@ -63,6 +63,11 @@ module.exports = async (req, res) => {
     } });
     const o = order.order;
 
+    if (Number(o.total_money.amount) === 0) {
+      // Fully discounted: close the order with no charge.
+      await sq('/v2/orders/' + o.id + '/pay', { method: 'POST', body: { idempotency_key: uid(), order_version: o.version, payment_ids: [] } });
+      return send(res, 200, { ok: true, orderId: o.id, total: 0, receiptUrl: '', pickupAt });
+    }
     const pay = await sq('/v2/payments', { method: 'POST', body: {
       idempotency_key: uid(), source_id: sourceId, verification_token: verificationToken || undefined,
       amount_money: o.total_money, order_id: o.id, location_id: LOC,
