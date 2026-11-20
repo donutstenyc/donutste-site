@@ -333,8 +333,9 @@ document.getElementById('cobtn').addEventListener('click',function(e){e.preventD
     if(!c){code='';total=boxTotal();dl.style.display='none';document.getElementById('ctot').textContent=money(total);payBtn.firstChild.nodeValue='Pay '+money(total)+' ';cm.textContent='';return}
     if(!LIVE){cm.textContent='Codes are checked with Square on donutste.com.';return}
     cm.textContent='Checking…';fetch('/api/discount',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:c,day:box.day,lines:lines()})}).then(function(r){return r.json().then(function(j){if(!r.ok||!j.ok)throw j;
-      code=c;total=j.total;dl.style.display='';dl.innerHTML='<span>'+j.name+'</span><span>&minus;'+money(j.off)+'</span>';document.getElementById('ctot').textContent=money(total);payBtn.firstChild.nodeValue='Pay '+money(total)+' ';cm.textContent='Code applied.'})})
-    .catch(function(j){code='';cm.textContent=(j&&j.error)||'That code isn’t valid.'})});
+      code=c;total=j.total;dl.style.display='';dl.innerHTML='<span>'+j.name+'</span><span>&minus;'+money(j.off)+'</span>';document.getElementById('ctot').textContent=money(total);setFree();cm.textContent='Code applied.'})})
+    .catch(function(j){code='';total=boxTotal();dl.style.display='none';document.getElementById('ctot').textContent=money(total);setFree();cm.textContent=(j&&j.error)||'That code isn’t valid.'})});
+  function setFree(){var free=total<=0;pn.querySelector('.meth').style.display=free?'none':'';document.getElementById('cardbox').style.display=free||meth!=='card'?'none':'';document.getElementById('giftbox').style.display=!free&&meth==='gift'?'':'none';payBtn.firstChild.nodeValue=free?'Place order ':'Pay '+money(total)+' '}
   payBtn.addEventListener('click',function(){
     var nm=document.getElementById('cn').value.trim(),em=document.getElementById('ce').value.trim(),ph=document.getElementById('cp').value.trim();
     if(!nm||!/.+@.+\..+/.test(em)||ph.replace(/\D/g,'').length<10){err.textContent='Please add your name, email and phone number.';return}
@@ -342,10 +343,11 @@ document.getElementById('cobtn').addEventListener('click',function(e){e.preventD
       pn.querySelector('.x').addEventListener('click',function(){box={day:null,q:{}};closeD();render()})}
     if(!LIVE){done('');return}
     var src=meth==='gift'?gcard:card;
+    if(total<=0&&code)src={tokenize:function(){return Promise.resolve({status:'OK',token:''})}};
     if(!src){err.textContent='The payment form is still loading.';return}
     err.textContent='';payBtn.disabled=true;payBtn.style.opacity=.6;
     src.tokenize().then(function(t){if(t.status!=='OK')throw {msg:meth==='gift'?'Please check your gift card number.':'Please check your card details.'};
-      return fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({day:box.day,date:ymd(dt),name:nm,email:em,phone:ph,sourceId:t.token,code:code||undefined,lines:lines()})})})
+      return fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({day:box.day,date:ymd(dt),name:nm,email:em,phone:ph,sourceId:t.token||undefined,code:code||undefined,lines:lines()})})})
     .then(function(r){return r.json().then(function(j){if(!r.ok||!j.ok)throw {msg:j.error};done(j.receiptUrl||' ')})})
     .catch(function(x){err.textContent=(x&&x.msg)||'Something went wrong. Please try again.';payBtn.disabled=false;payBtn.style.opacity=1})});
 });

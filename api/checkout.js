@@ -10,7 +10,7 @@ module.exports = async (req, res) => {
   try {
     const b = await readBody(req);
     const { day, date, lines, name, email, phone, sourceId, verificationToken, code } = b;
-    if (!sourceId) return send(res, 400, { error: 'Payment details missing.' });
+    if (!sourceId && !code) return send(res, 400, { error: 'Payment details missing.' });
     if (!name || !email || !phone) return send(res, 400, { error: 'Please add your name, email and phone.' });
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date || '')) return send(res, 400, { error: 'Pickup date missing.' });
 
@@ -67,6 +67,10 @@ module.exports = async (req, res) => {
       // Fully discounted: close the order with no charge.
       await sq('/v2/orders/' + o.id + '/pay', { method: 'POST', body: { idempotency_key: uid(), order_version: o.version, payment_ids: [] } });
       return send(res, 200, { ok: true, orderId: o.id, total: 0, receiptUrl: '', pickupAt });
+    }
+    if (!sourceId) {
+      try { await sq('/v2/orders/' + o.id, { method: 'PUT', body: { idempotency_key: uid(), order: { location_id: LOC, version: o.version, state: 'CANCELED' } } }); } catch (_) {}
+      return send(res, 400, { error: 'Please add a card to pay the rest.' });
     }
     const pay = await sq('/v2/payments', { method: 'POST', body: {
       idempotency_key: uid(), source_id: sourceId, verification_token: verificationToken || undefined,
