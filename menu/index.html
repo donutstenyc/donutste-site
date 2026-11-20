@@ -263,7 +263,7 @@ var DAYS={
 var POPUP=null;
 function dateFor(D){if(D.popup){if(!POPUP)return null;var p=POPUP.date.split('-');return new Date(+p[0],p[1]-1,+p[2])}return nextDate(D.dow)}
 function hoursFor(D){return D.popup?(POPUP?POPUP.hours:''):D.hours}
-function addrFor(D){return D.popup?(POPUP?POPUP.place+', '+POPUP.addr:''):D.addr}
+function addrFor(D){return D.popup?(POPUP?[POPUP.place,POPUP.addr].filter(Boolean).join(', '):''):D.addr}
 function nextDate(dow){var d=new Date();d.setHours(0,0,0,0);var k=(dow-d.getDay()+7)%7;if(k===0)k=7;d.setDate(d.getDate()+k);return d}
 function fmt(d){return d.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'})}
 function short(d){return d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}
@@ -282,7 +282,7 @@ var drawn={};
 function render(){
   menu.innerHTML=Object.keys(DAYS).map(function(d){var D=DAYS[d],shown=ITEMS.filter(function(it){return it.days.indexOf(d)>=0}),dt=dateFor(D);
     var notes=[];shown.forEach(function(it){notesFor(it).forEach(function(k){if(k!=='wheat'&&notes.indexOf(k)<0)notes.push(k)})});notes=notes.slice(0,5);
-    var when=D.popup?(POPUP?'<b>'+fmt(dt)+'</b> &middot; '+POPUP.hours+'<br>'+POPUP.place+' &middot; '+POPUP.addr:'The day and the place change every time.'):'Pickup <b>'+fmt(dt)+'</b> &middot; '+D.hours+'<br>Lake Mary';
+    var when=D.popup?(POPUP?'<b>'+fmt(dt)+'</b> &middot; '+POPUP.hours+'<br>'+[POPUP.place,POPUP.addr].filter(Boolean).join(' &middot; '):'The day and the place change every time.'):'Pickup <b>'+fmt(dt)+'</b> &middot; '+D.hours+'<br>Lake Mary';
     var body=shown.length?shown.map(function(it,i){return rowHTML(it,i,d)}).join('')+(d==='Wed'&&!LIVE?'<p class="src">Preview: this week&rsquo;s Wednesday flyer. Every day loads live from Square at launch.</p>':''):
       (LOADING?'<div class="empty">Loading this week&rsquo;s menu&hellip;</div>':'<div class="empty">'+(D.popup?(POPUP?'The pop-up menu posts soon.':'The next pop-up is being planned.'):'This week&rsquo;s '+D.name+' menu posts soon.')+'<small>'+(D.popup?'Date, place and flavors appear here once it is set':'Loads live from Square')+'</small></div>');
     return '<section class="dsec" id="d-'+d+'"><div class="dhd"><div><div class="kicker">'+(D.popup?'Pop-up &middot; Dates &amp; places vary':'Pre-order &middot; '+D.name+' pickup')+'</div><h2>'+D.name+'<em>.</em></h2><p class="when">'+when+'</p></div>'+

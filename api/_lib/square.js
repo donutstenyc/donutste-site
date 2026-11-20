@@ -139,7 +139,7 @@ async function getMenu(debug) {
           date: dt.toISOString().slice(0, 10),
           hours: ps.map((p) => fmtTime(p.start_local_time) + ' – ' + fmtTime(p.end_local_time)).join(', '),
           start: ps[0].start_local_time.slice(0, 5),
-          place: (P.description && P.description.length < 60 ? P.description : '') || 'Pop-up',
+          place: '',
           addr: [pa.address_line_1, pa.locality].filter(Boolean).join(', '),
         };
       }
