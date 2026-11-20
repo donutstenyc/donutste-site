@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Donutste Gift Cards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=Instrument+Serif:ital@0;1&display=swap">
+<style>
+:root{--cream:#FBF3EA;--ink:#22130B;--soft:#7A665A;--hair:#E8DACB;--pink:#FB5588;--esp:#1B100A;--mint:#E4EFE6;--mint-ink:#1F3324;
+--display:"Instrument Serif","Bodoni 72","Didot",Georgia,serif;--body:"DM Sans",ui-sans-serif,system-ui,sans-serif;color-scheme:light}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--cream);color:var(--ink)}
+body{font-family:var(--body);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none}img,video{display:block;max-width:100%}
+.wrap{padding-left:max(28px,env(safe-area-inset-left,0px));padding-right:max(28px,env(safe-area-inset-right,0px))}
+@media (max-width:600px){.wrap{padding-left:16px;padding-right:16px}}
+header{position:fixed;top:0;left:0;right:0;z-index:20;transition:background .4s;color:var(--ink)}
+header.s{background:rgba(251,243,234,.9);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+header .bar{display:flex;align-items:center;gap:36px;height:72px}
+header .bar>a>img{height:48px;width:auto}
+header nav{display:flex;gap:28px;font-size:13px;opacity:.75}header nav a.on{opacity:1;text-decoration:underline;text-underline-offset:6px}
+.pill{margin-left:auto;display:inline-flex;align-items:center;gap:10px;background:var(--pink);color:#fff;font-size:13px;font-weight:500;padding:9px 10px 9px 18px;border-radius:999px;border:0;cursor:pointer;font-family:var(--body);white-space:nowrap}
+.pill i{width:18px;height:18px;border-radius:50%;background:#fff;display:grid;place-items:center}
+.pill i::after{content:"";width:5px;height:5px;border-top:1.5px solid var(--pink);border-right:1.5px solid var(--pink);transform:translateX(-1px) rotate(45deg)}
+@media (max-width:900px){header nav{display:none}}
+.kicker{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--soft);display:flex;align-items:center;gap:10px}
+h1,h2{font-family:var(--display);font-weight:400;text-transform:uppercase;line-height:.88;letter-spacing:-.01em;margin:0}
+h2 em{font-style:italic;text-transform:none;color:var(--pink)}
+h2{font-size:clamp(46px,6.4vw,104px)}
+p.body{color:var(--soft);max-width:44ch;font-size:clamp(15px,1.15vw,17px)}
+
+/* HERO */
+.hero{position:relative;height:100svh;min-height:620px;overflow:hidden;touch-action:pan-y;cursor:pointer}
+.hero h1{position:absolute;left:0;right:0;top:19%;text-align:center;font-size:clamp(92px,20vw,330px);line-height:.8;letter-spacing:-.02em;pointer-events:none;user-select:none}
+.hero h1 em{display:block;font-style:italic;text-transform:none;color:var(--pink);font-size:.62em;margin-top:.02em}
+.hero .kick{position:absolute;top:92px;left:0;right:0;display:flex;justify-content:center;text-align:center;padding:0 16px}
+.give{font-family:var(--display);font-size:clamp(24px,2.6vw,40px);line-height:1;margin:0;color:var(--ink)}.give em{color:var(--pink)}
+.pile{position:absolute;inset:0;pointer-events:none}
+.pile img{position:absolute;left:0;top:0;will-change:transform;filter:drop-shadow(0 14px 18px rgba(34,19,11,.18));user-select:none}
+.hero .stagecard{position:absolute;left:50%;top:50%;width:min(420px,72vw);transform:translate(-50%,-50%);z-index:3;pointer-events:none}
+.hero .hint{position:absolute;bottom:22px;left:0;right:0;text-align:center;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--soft);z-index:4;pointer-events:none}
+
+/* CARD */
+.gc{position:relative;aspect-ratio:1.586;border-radius:6.2%/9.8%;transform-style:preserve-3d;transition:transform .25s ease-out;
+ --mx:50%;--my:30%;
+ background:
+  radial-gradient(120% 90% at var(--mx) var(--my),rgba(255,255,255,.55),rgba(255,255,255,0) 42%),
+  linear-gradient(135deg,#FF8DB0 0%,#FB5588 46%,#E83D74 100%);
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.65),inset 0 -2px 6px rgba(140,10,50,.25),0 40px 70px -28px rgba(160,20,70,.55),0 12px 24px -12px rgba(34,19,11,.35);
+ color:#fff;overflow:hidden}
+.gc::before{content:"";position:absolute;inset:0;border-radius:inherit;border:1px solid rgba(255,255,255,.35)}
+.gc::after{content:"";position:absolute;inset:-40%;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.28) 48%,transparent 56%);transform:translateX(calc(var(--sx,0) * 1%));pointer-events:none}
+.gc .lg{position:absolute;left:7%;top:12%;width:27%;opacity:.95;filter:drop-shadow(0 1px 0 rgba(150,20,60,.35))}
+.gc .ttl{position:absolute;right:7%;top:10%;text-align:right;font-family:var(--display);line-height:.9}
+.gc .ttl i{display:block;font-size:clamp(26px,3.6vw,46px)}
+.gc .amt{position:absolute;right:7%;bottom:12%;font-family:var(--display);font-size:clamp(34px,4.8vw,64px);line-height:1;transition:opacity .2s}
+.gc .ln{position:absolute;left:7%;bottom:12%;font-family:var(--display);font-style:italic;font-size:clamp(16px,1.6vw,22px);opacity:.9;line-height:1.7}
+.gc .chip{position:absolute;left:7%;top:58%;width:11%;aspect-ratio:1.3;border-radius:14%;background:linear-gradient(135deg,#FFE3EC,#F7B9CC 50%,#FFE3EC);opacity:.75}
+
+/* BUY */
+.buy{padding-top:clamp(100px,12vw,180px);padding-bottom:clamp(100px,12vw,180px);display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(40px,7vw,120px);align-items:center}
+.buy .gcwrap{perspective:1200px}
+.amts{display:flex;flex-wrap:wrap;gap:10px;margin:34px 0 0}
+.amts button{font:400 clamp(26px,2.4vw,34px)/1 var(--display);background:transparent;border:1px solid var(--hair);color:var(--ink);padding:14px 22px 12px;border-radius:999px;cursor:pointer;transition:all .25s;min-width:86px}
+.own{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--hair);border-radius:999px;padding:0 20px;font:400 clamp(26px,2.4vw,34px)/1 var(--display);transition:all .25s}
+.own input{font:inherit;border:0;background:transparent;width:5.2em;outline:none;color:inherit;padding:14px 0 12px}.own input::placeholder{color:#B9A899;font-size:.62em}
+.own.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.own input::-webkit-outer-spin-button,.own input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}.own input{-moz-appearance:textfield}
+.amts button.on{background:var(--ink);border-color:var(--ink);color:var(--cream)}
+.cta{display:flex;flex-wrap:wrap;align-items:center;gap:18px 26px;margin-top:34px}
+.pill.big{font-size:14px;padding:13px 12px 13px 24px;margin:0}
+.lnk{font-size:13px;color:var(--soft);text-decoration:underline;text-underline-offset:5px}
+.fine{font-size:13px;color:var(--soft);margin-top:22px;max-width:46ch}
+@media (max-width:900px){.buy{grid-template-columns:1fr}.buy .gcwrap{order:-1;max-width:460px;width:100%;margin:0 auto}}
+
+.bal{padding-top:clamp(40px,6vw,90px);padding-bottom:clamp(100px,12vw,170px);display:grid;grid-template-columns:.95fr 1.05fr;gap:clamp(40px,7vw,120px);align-items:center}
+.bal .gcwrap{perspective:1200px}
+.balf{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+.balf input{font:400 clamp(22px,2vw,28px)/1 var(--display);letter-spacing:.06em;border:1px solid var(--hair);background:#fff8;border-radius:999px;padding:14px 22px 12px;min-width:0;flex:1 1 260px;color:var(--ink);outline:none}
+.balf input:focus{border-color:var(--ink)}
+.balf .pill{flex:0 0 auto}
+#bamt{transition:opacity .25s}
+.gc .bl{position:absolute;right:7%;bottom:calc(12% + clamp(38px,5.2vw,70px));font-size:clamp(8px,.75vw,10px);letter-spacing:.24em;text-transform:uppercase;opacity:.9}
+@media (max-width:900px){.bal{grid-template-columns:1fr}.bal .gcwrap{max-width:460px;width:100%;margin:0 auto}}
+/* HOW */
+.how{background:var(--esp);color:var(--cream);padding-top:clamp(100px,12vw,170px);padding-bottom:clamp(100px,12vw,170px)}
+.how .kicker{color:#B8A494}
+.steps3{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(24px,4vw,60px);margin-top:clamp(40px,6vw,80px);border-top:1px solid #3A2A20;padding-top:34px}
+.steps3 b{font-weight:400;font-size:10px;letter-spacing:.22em;color:var(--pink)}
+.steps3 h3{font-family:var(--display);font-weight:400;font-size:clamp(30px,3vw,44px);line-height:1;margin:14px 0 12px;text-transform:uppercase}
+.steps3 p{color:#CDBBAA;margin:0;max-width:30ch}
+@media (max-width:760px){.steps3{grid-template-columns:1fr}}
+footer{padding-top:30px;padding-bottom:40px;font-size:12px;color:var(--soft);display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;border-top:1px solid var(--hair)}
+.rv{opacity:0;transform:translateY(24px);transition:opacity .9s,transform .9s}.rv.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}}
+.gd{position:fixed;inset:0;z-index:60;display:none}.gd.show{display:block}
+.gd .sh{position:absolute;inset:0;background:rgba(34,19,11,.4)}
+.gd .pn{position:absolute;right:0;top:0;bottom:0;width:min(480px,100%);background:var(--cream,#FBF3EA);padding:34px clamp(20px,3vw,40px);overflow:auto;display:flex;flex-direction:column;gap:14px;color:var(--ink,#22130B)}
+.gd h3{font-family:var(--display);font-weight:400;text-transform:uppercase;font-size:44px;line-height:.9;margin:0}
+.gd .x{position:absolute;right:18px;top:18px;width:38px;height:38px;border-radius:50%;border:1px solid #E8DACB;background:none;cursor:pointer;font-size:18px}
+.gd label{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#7A665A;display:grid;gap:6px}
+.gd input,.gd textarea{font:400 15px var(--body);border:1px solid #E8DACB;border-radius:12px;padding:12px 14px;background:#fff;color:#22130B}
+.gd .sub{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7A665A;margin-top:8px}
+.gd .cardf{border:1px dashed #D8C6B4;border-radius:12px;padding:16px;font-size:13px;color:#7A665A;text-align:center}
+.gd .err{color:#B3261E;font-size:13px;margin:0;min-height:1em}
+.gd .pay{justify-content:center;width:100%;margin:0}
+.gd .gan{font-family:var(--display);font-size:30px;letter-spacing:.06em;text-align:center;border:1px solid #E8DACB;border-radius:14px;padding:16px;background:#fff}
+</style></head>
+<body>
+<header class="wrap" id="hd"><div class="bar"><a href="/" aria-label="Donutste"><img src="navlogo.webp" alt="Donutste Doughnuts"></a>
+<nav><a href="/menu/">Menu</a><a href="/fit/">Donutste Fit</a><a href="/doughssant/">Doughssant</a><a href="/coffee/">Coffee</a><a class="on" href="/gift-cards/">Gift Cards</a><a href="/press/">Press</a><a href="/our-story/">Our Story</a></nav>
+<a class="pill" href="#buy">Send a gift card <i></i></a></div></header>
+
+<section class="hero" id="top" aria-label="Donutste gift cards">
+  <div class="kick"><p class="give">Give the gift of <em>Donutste.</em></p></div>
+  <h1>Gift card</h1>
+  <div class="pile" id="pile" aria-hidden="true"></div>
+  <div class="stagecard"><div class="gc" id="gc1" role="img" aria-label="Pink Donutste gift card">
+    <img class="lg" src="logo-w.png" alt=""><div class="ttl"><i>Gift Card</i></div><div class="chip"></div>
+    <div class="ln">Welcome home.</div><div class="amt">$50</div></div></div>
+</section>
+
+<section class="buy wrap" id="buy">
+  <div class="rv">
+    <div class="kicker">Give something sweet</div>
+    <h2 style="margin-top:20px">Send a box<br><em>of love.</em></h2>
+    <p class="body" style="margin-top:26px">A Donutste gift card for birthdays, thank-yous, or just because. Pick an amount and we&rsquo;ll send it straight to their inbox.</p>
+    <div class="amts" role="radiogroup" aria-label="Gift card amount">
+      <button type="button" data-a="25" role="radio" aria-checked="false">$25</button><button type="button" data-a="50" class="on" role="radio" aria-checked="true">$50</button><button type="button" data-a="75" role="radio" aria-checked="false">$75</button><button type="button" data-a="100" role="radio" aria-checked="false">$100</button><label class="own" id="own"><span>$</span><input id="ownin" type="number" inputmode="numeric" min="10" max="500" step="1" placeholder="Your amount" aria-label="Enter your own amount"></label>
+    </div>
+    <div class="cta"><a class="pill big" id="buybtn" href="#buy">Buy a $50 gift card <i></i></a><a class="lnk" id="balbtn" href="#balance">Check your balance</a></div>
+    <p class="fine">Any amount from $10 to $500. Checkout is secure through Square.</p>
+  </div>
+  <div class="gcwrap"><div class="gc" id="gc2" role="img" aria-label="Pink Donutste gift card">
+    <img class="lg" src="logo-w.png" alt=""><div class="ttl"><i>Gift Card</i></div><div class="chip"></div>
+    <div class="ln">Welcome home.</div><div class="amt" id="amt2">$50</div></div></div>
+</section>
+
+<section class="bal wrap" id="balance">
+  <div class="gcwrap"><div class="gc" id="gc3" role="img" aria-label="Pink Donutste gift card showing its balance">
+    <img class="lg" src="logo-w.png" alt=""><div class="ttl"><i>Gift Card</i></div><div class="chip"></div>
+    <div class="ln" id="gln">Welcome home.</div><div class="amt" id="bamt">$&ndash;&ndash;</div></div></div>
+  <div class="rv">
+    <div class="kicker">Check your balance</div>
+    <h2 style="margin-top:20px">What&rsquo;s left<br><em>on your card?</em></h2>
+    <p class="body" style="margin-top:26px">Enter the number from your gift card email or the back of your card.</p>
+    <form class="balf" id="balf" autocomplete="off">
+      <input id="gan" inputmode="numeric" autocomplete="off" placeholder="7783 3200 0000 0000" aria-label="Gift card number" maxlength="19">
+      <button class="pill big" type="submit">Check balance <i></i></button>
+    </form>
+    <p class="fine" id="bmsg" aria-live="polite">Your balance updates every time you use your card, in the shop or on a pre-order.</p>
+  </div>
+</section>
+
+<section class="how wrap">
+  <div class="kicker">How it works</div>
+  <h2 style="margin-top:20px">Sweet, <em>simple.</em></h2>
+  <div class="steps3">
+    <div class="rv"><b>01</b><h3>Pick an amount</h3><p>Choose a card above, or any amount at checkout.</p></div>
+    <div class="rv"><b>02</b><h3>Send it</h3><p>It goes straight to their email or phone, ready to use.</p></div>
+    <div class="rv"><b>03</b><h3>Treat yourself</h3><p>Use it at the bakery or on your next pre-order.</p></div>
+  </div>
+</section>
+
+<div class="gd" id="gd" role="dialog" aria-modal="true" aria-label="Buy a gift card"><div class="sh" data-close></div><div class="pn" id="gpn"></div></div>
+<footer class="wrap"><span>Welcome Home &middot; Donutste Doughnuts &amp; Coffee</span><span>Lake Mary, Florida</span></footer>
+
+<script>
+(function(){
+// Square links: paste the eGift card page + balance page from Square Dashboard > Gift Cards
+var SQUARE_GIFT_URL='#';
+// Balance: at launch BALANCE_API = '/api/gift-balance' (server calls Square Gift Cards API: retrieve gift card from GAN, returns balance_money). Empty = preview sample.
+var LIVE=!/claude|^$|localhost/.test(location.hostname)&&location.protocol!=='file:';
+var BALANCE_API=LIVE?'/api/gift-balance':'';
+var hd=document.getElementById('hd');function onS(){hd.classList.toggle('s',scrollY>40)}addEventListener('scroll',onS,{passive:true});onS();
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.15});
+document.querySelectorAll('.rv').forEach(function(el){io.observe(el)});
+
+// card tilt + shine
+function tilt(card,host){host.addEventListener('pointermove',function(e){var r=card.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;
+  x=Math.max(-.3,Math.min(1.3,x));y=Math.max(-.3,Math.min(1.3,y));
+  card.style.transform='rotateY('+((x-.5)*16)+'deg) rotateX('+((.5-y)*12)+'deg)';card.style.setProperty('--mx',(x*100)+'%');card.style.setProperty('--my',(y*100)+'%');card.style.setProperty('--sx',((x-.5)*30))});
+  host.addEventListener('pointerleave',function(){card.style.transform='';card.style.setProperty('--mx','50%');card.style.setProperty('--my','30%')})}
+var g1=document.getElementById('gc1'),g2=document.getElementById('gc2');
+tilt(g1,document.getElementById('top'));tilt(g2,g2.parentNode);
+g1.parentNode.style.perspective='1200px';
+var t0=performance.now();(function bob(t){if(!g1.matches(':hover')){var a=(t-t0)/1000;g1.parentNode.style.transform='translate(-50%,calc(-50% + '+(Math.sin(a*1.1)*8)+'px)) rotate('+(Math.sin(a*.7)*1.5)+'deg)'}requestAnimationFrame(bob)})(t0);
+
+// amounts
+var amt=50,bb=document.getElementById('buybtn');
+bb.addEventListener('click',function(e){e.preventDefault();openBuy()});
+var own=document.getElementById('own'),oin=document.getElementById('ownin');
+function show(v){amt=v;var el=document.getElementById('amt2');el.textContent='$'+v;g1.querySelector('.amt').textContent='$'+v;bb.firstChild.nodeValue='Buy a $'+v+' gift card '}
+function pick(b){document.querySelectorAll('.amts button').forEach(function(x){x.classList.toggle('on',x===b);x.setAttribute('aria-checked',x===b)});own.classList.toggle('on',!b)}
+document.querySelectorAll('.amts button').forEach(function(b){b.addEventListener('click',function(){pick(b);oin.value='';var el=document.getElementById('amt2');el.style.opacity=0;setTimeout(function(){show(+b.dataset.a);el.style.opacity=1},180)})});
+oin.addEventListener('focus',function(){pick(null)});
+oin.addEventListener('input',function(){var v=Math.round(+oin.value||0);if(v>500){v=500;oin.value=500}pick(null);if(v>=1)show(v)});
+oin.addEventListener('blur',function(){var v=Math.round(+oin.value||0);if(oin.value!==''&&v<10){oin.value=10;show(10)}});
+
+// buy (Square payment -> gift card created + activated for the exact amount)
+var gd=document.getElementById('gd'),gpn=document.getElementById('gpn'),SQ=null,gcard=null;
+gd.addEventListener('click',function(e){if(e.target.hasAttribute('data-close'))gd.classList.remove('show')});
+function loadSquare(){if(SQ)return SQ;SQ=fetch('/api/config').then(function(r){return r.json()}).then(function(c){if(!c.applicationId)throw 0;return new Promise(function(ok,no){var sc=document.createElement('script');sc.src=c.env==='sandbox'?'https://sandbox.web.squarecdn.com/v1/square.js':'https://web.squarecdn.com/v1/square.js';sc.onload=function(){ok(window.Square.payments(c.applicationId,c.locationId))};sc.onerror=no;document.head.appendChild(sc)})});SQ.catch(function(){SQ=null});return SQ}
+function esc(t){return String(t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function openBuy(){var v=Math.max(10,Math.min(500,amt));
+  gpn.innerHTML='<button class="x" type="button" data-close aria-label="Close">&times;</button><div class="kicker">Gift card</div><h3>$'+v+' gift card</h3>'+
+  '<div class="sub">From</div><label>Your name<input id="bn" autocomplete="name"></label><label>Your email<input id="be" type="email" autocomplete="email"></label>'+
+  '<div class="sub">To</div><label>Their name<input id="tn"></label><label>Their email (we send the card here)<input id="te" type="email"></label><label>Message (optional)<textarea id="tm" rows="2" maxlength="300"></textarea></label>'+
+  '<div class="cardf" id="gcardbox">'+(LIVE?'Loading secure card form&hellip;':'Square secure card form appears here on donutste.com')+'</div><p class="err" id="gerr"></p>'+
+  '<button class="pill big pay" type="button" id="gpay">Pay $'+v.toFixed(2)+' <i></i></button><p style="font-size:11px;color:#7A665A;margin:0;text-align:center">Payments are processed securely by Square.</p>';
+  gpn.querySelector('.x').addEventListener('click',function(){gd.classList.remove('show')});gd.classList.add('show');gcard=null;
+  if(LIVE)loadSquare().then(function(pay){return pay.card().then(function(c){var cb=document.getElementById('gcardbox');cb.innerHTML='';cb.style.border='0';cb.style.padding='0';return c.attach('#gcardbox').then(function(){gcard=c})})}).catch(function(){document.getElementById('gcardbox').textContent='Card form could not load. Please refresh and try again.'});
+  var btn=document.getElementById('gpay'),err=document.getElementById('gerr');
+  btn.addEventListener('click',function(){var bn=document.getElementById('bn').value.trim(),be=document.getElementById('be').value.trim(),tn=document.getElementById('tn').value.trim(),te=document.getElementById('te').value.trim(),tm=document.getElementById('tm').value.trim();
+    if(!bn||!/.+@.+\..+/.test(be)){err.textContent='Please add your name and email.';return}
+    if(te&&!/.+@.+\..+/.test(te)){err.textContent='Check their email address.';return}
+    function done(g){gpn.innerHTML='<button class="x" type="button" aria-label="Close">&times;</button><div class="kicker">Sent with love</div><h3>Gift card<br><em style="font-style:italic;text-transform:none;color:var(--pink)">ready.</em></h3><p style="color:#7A665A">$'+v.toFixed(2)+(tn?' for '+esc(tn):'')+'. '+(te?'We emailed the card to '+esc(te)+' and a copy to you.':'We emailed the card to you.')+'</p><div class="sub">Card number</div><div class="gan">'+g.replace(/(\d{4})/g,'$1 ').trim()+'</div><p style="font-size:12px;color:#7A665A">Save this number. It works at checkout on donutste.com and at the counter.</p>';
+      gpn.querySelector('.x').addEventListener('click',function(){gd.classList.remove('show')})}
+    if(!LIVE){done('7783320000000000');return}
+    if(!gcard){err.textContent='The card form is still loading.';return}
+    err.textContent='';btn.disabled=true;btn.style.opacity=.6;
+    gcard.tokenize().then(function(t){if(t.status!=='OK')throw {m:'Please check your card details.'};
+      return fetch('/api/gift-card',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cents:v*100,sourceId:t.token,buyerName:bn,buyerEmail:be,toName:tn,toEmail:te,message:tm})})})
+    .then(function(r){return r.json().then(function(j){if(!r.ok||!j.ok)throw {m:j.error};done(j.gan)})})
+    .catch(function(x){err.textContent=(x&&x.m)||'Something went wrong. Please try again.';btn.disabled=false;btn.style.opacity=1})})}
+// balance checker
+var g3=document.getElementById('gc3');tilt(g3,g3.parentNode);
+var gan=document.getElementById('gan'),bamt=document.getElementById('bamt'),bmsg=document.getElementById('bmsg');
+gan.addEventListener('input',function(){var d=gan.value.replace(/\D/g,'').slice(0,16);gan.value=d.replace(/(.{4})/g,'$1 ').trim()});
+document.getElementById('balf').addEventListener('submit',function(e){e.preventDefault();var d=gan.value.replace(/\D/g,'');
+  if(d.length<16){bmsg.textContent='Gift card numbers are 16 digits. Check your email or the back of your card.';return}
+  bmsg.textContent='Checking with Square...';bamt.style.opacity=.3;
+  function done(cents){bamt.textContent='$'+(cents/100).toFixed(2);bamt.style.opacity=1;document.getElementById('gln').textContent='Ending in '+d.slice(-4);
+    bmsg.textContent=cents>0?'You have $'+(cents/100).toFixed(2)+' left. Treat yourself.':'This card has no balance left.'}
+  if(BALANCE_API){fetch(BALANCE_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({gan:d})}).then(function(r){return r.json()}).then(function(j){if(j&&typeof j.cents==='number')done(j.cents);else{bmsg.textContent='We couldn\u2019t find that card. Double-check the number.';bamt.style.opacity=1}}).catch(function(){bmsg.textContent='Something went wrong. Please try again.';bamt.style.opacity=1})}
+  else setTimeout(function(){done(3250);bmsg.textContent+=' (Preview: sample balance until Square is connected.)'},700)});
+// falling pastries
+var hero=document.getElementById('top'),pile=document.getElementById('pile');
+var SRC=['dragon','dough','r_classic','ds_rv','rv','r_toffee','ds_or','plantain','r_guava','ds_sugar','lime','r_sugar','dough','r_apple','ube','ds_rv','pist','pea','ds_or','r_biscoff','banana','ds_sugar','r_pumpkin','cheese','uberoll','choc','dchoc'];
+var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+var B=[],W,H,S;function size(){W=hero.clientWidth;H=hero.clientHeight;S=Math.max(.55,Math.min(1,W/1300))}size();addEventListener('resize',size);
+function add(x,y,i){if(B.length>=46){var o=B.shift();o.el.remove()}
+  var name=SRC[i%SRC.length],im=new Image();im.src='p/'+name+'.webp';im.alt='';
+  var d=((name==='dough'||name.indexOf('ds_')===0)?175:(name==='pist'||name.indexOf('r_')===0)?165:150)*S*(.85+Math.random()*.3),r=d*.42;
+  im.style.width=d+'px';pile.appendChild(im);
+  B.push({el:im,x:x,y:y,vx:(Math.random()-.5)*2,vy:0,r:r,d:d,a:Math.random()*6.28,va:(Math.random()-.5)*.08})}
+var n=0,spawn=reduce?0:(innerWidth<700?18:30);
+function seed(){var k=n++;add(W*(.08+Math.random()*.84),-120-Math.random()*80,k)}
+if(reduce){for(var i=0;i<22;i++){n++;add(W*(.05+.9*Math.random()),H-60-Math.random()*120,i)}}
+var acc=0,mx=-999,my=-999;
+hero.addEventListener('pointermove',function(e){var r=hero.getBoundingClientRect();mx=e.clientX-r.left;my=e.clientY-r.top});
+hero.addEventListener('pointerleave',function(){mx=my=-999});
+hero.addEventListener('click',function(e){var r=hero.getBoundingClientRect();for(var j=0;j<3;j++){add(e.clientX-r.left+(j-1)*40,-80-j*60,n++)}});
+var last=performance.now(),on=true;
+new IntersectionObserver(function(es){on=es[0].isIntersecting}).observe(hero);
+function step(t){var dt=Math.min(32,t-last)/16.67;last=t;
+  if(on){
+  if(spawn>0){acc+=dt;if(acc>9){acc=0;spawn--;seed()}}
+  for(var i=0;i<B.length;i++){var b=B[i];b.vy+=.42*dt;
+    if(mx>-900){var dx=b.x-mx,dy=b.y-my,dd=dx*dx+dy*dy,R=110*S;if(dd<R*R&&dd>1){var f=(1-Math.sqrt(dd)/R)*1.6;dd=Math.sqrt(dd);b.vx+=dx/dd*f*dt;b.vy+=dy/dd*f*dt}}
+    b.x+=b.vx*dt;b.y+=b.vy*dt;b.a+=b.va*dt}
+  for(var it=0;it<3;it++){
+    for(i=0;i<B.length;i++){var p=B[i];
+      for(var j=i+1;j<B.length;j++){var q=B[j],dx=q.x-p.x,dy=q.y-p.y,rr=p.r+q.r,dd=dx*dx+dy*dy;
+        if(dd<rr*rr&&dd>.01){dd=Math.sqrt(dd);var o=(rr-dd)/2,nx=dx/dd,ny=dy/dd;p.x-=nx*o;p.y-=ny*o;q.x+=nx*o;q.y+=ny*o;
+          var rv=(q.vx-p.vx)*nx+(q.vy-p.vy)*ny;if(rv<0){var imp=rv*.6;p.vx+=imp*nx;p.vy+=imp*ny;q.vx-=imp*nx;q.vy-=imp*ny}}}
+      if(p.y>H-p.r){p.y=H-p.r;if(p.vy>0)p.vy*=-.25;p.vx*=.9;p.va=p.vx*.02}
+      if(p.x<p.r){p.x=p.r;p.vx=Math.abs(p.vx)*.4}if(p.x>W-p.r){p.x=W-p.r;p.vx=-Math.abs(p.vx)*.4}}}
+  for(i=0;i<B.length;i++){b=B[i];b.vx*=.995;b.va*=.97;b.el.style.transform='translate('+(b.x-b.d/2)+'px,'+(b.y-b.d/2)+'px) rotate('+b.a+'rad)'}
+  }
+  requestAnimationFrame(step)}
+requestAnimationFrame(step);
+})();
+</script>
+</body></html>
