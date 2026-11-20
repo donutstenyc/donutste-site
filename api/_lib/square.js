@@ -131,6 +131,7 @@ async function getMenu(debug) {
     const imgId = (d.image_ids || [])[0];
     const raw = (d.name || '').trim();
     const nm = cleanName(raw);
+    if (isBottle) nm.name = nm.name.replace(/\s*bottled\s*$/i, '').replace(/^frutty/i, 'Fruity').replace(/\b([a-z])/g, (m) => m.toUpperCase()).replace(/\bEt\b/, 'et').replace(/\bAnd\b/, 'and').replace(/Brulee/g, 'Brûlée');
     items.push({
       id: o.id, varId: v.id, name: nm.name, tag: nm.tag || undefined, desc: (d.description_plaintext || d.description || '').trim(),
       price: v.cents / 100, soldOut: vars.every((x) => x.soldOut), img: imgId ? imgs[imgId] || null : null, days, bottle: isBottle || undefined,
