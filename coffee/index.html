@@ -328,7 +328,7 @@ document.querySelectorAll('video').forEach(function(v){vio.observe(v)});
 function esc(t){return String(t||'').replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]})}
 fetch('/api/menu').then(function(r){return r.json()}).then(function(m){var B=m.bottles||[],N=(window.CHEF||{});
  if(!B.length){cta.innerHTML='<p class="body" style="margin:0">Bottles are between batches right now. They come back on the pre-order menu as soon as the next flavors are ready.</p><a class="pill" href="/menu/" style="margin:18px 0 0">Pre-order your box <i></i></a>';return}
- ul.innerHTML=B.map(function(b){var note=N[b.name]||b.desc;return '<li'+(b.soldOut?' class="so"':'')+'><b>'+esc(b.name)+'</b><span>'+(b.soldOut?'Sold out':'$'+b.price.toFixed(2))+'</span>'+(note?'<p>'+esc(note).replace(/\n+/g,'<br>')+'</p>':'')+'</li>'}).join('');box.hidden=false;
+ ul.innerHTML=B.map(function(b){var note=b.chef||b.desc;return '<li'+(b.soldOut?' class="so"':'')+'><b>'+esc(b.name)+'</b><span>'+(b.soldOut?'Sold out':'$'+b.price.toFixed(2))+'</span>'+(note?'<p>'+esc(note).replace(/\n+/g,'<br>')+'</p>':'')+'</li>'}).join('');box.hidden=false;
 }).catch(function(){});})();
 </script>
 </body></html>

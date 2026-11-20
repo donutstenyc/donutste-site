@@ -77,6 +77,14 @@ function cleanName(raw) {
 }
 
 // Builds the live menu: items per day + pickup hours from the location's business hours.
+// Chef's notes (approved by V): chef-notes.json, keyed by flavor name. Matched loosely to Square names.
+const normName = (n) => String(n || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+  .replace(/\([^)]*\)/g, ' ').replace(/\s[-–]\s.*$/, ' ').replace(/\bbottled\b/g, ' ').replace(/frutty/g, 'fruity').replace(/[^a-z0-9]+/g, '');
+let CHEF = null;
+function chefFor(raw) {
+  if (!CHEF) { CHEF = {}; try { const J = require('../../chef-notes.json'); Object.keys(J).forEach((k) => { CHEF[normName(k)] = J[k]; }); } catch (_) {} }
+  return CHEF[normName(raw)] || undefined;
+}
 async function getMenu(debug) {
   const PID0 = POPUP_LOCATION_ID();
   const [objs, loc, ploc] = await Promise.all([
@@ -133,7 +141,7 @@ async function getMenu(debug) {
     const nm = cleanName(raw);
     if (isBottle) nm.name = nm.name.replace(/\s*bottled\s*$/i, '').replace(/^frutty/i, 'Fruity').replace(/\b([a-z])/g, (m) => m.toUpperCase()).replace(/\bEt\b/, 'et').replace(/\bAnd\b/, 'and').replace(/Brulee/g, 'Brûlée');
     items.push({
-      id: o.id, varId: v.id, name: nm.name, tag: nm.tag || undefined, desc: (d.description_plaintext || d.description || '').trim(),
+      id: o.id, varId: v.id, name: nm.name, tag: nm.tag || undefined, desc: (d.description_plaintext || d.description || '').trim(), chef: chefFor(raw),
       price: v.cents / 100, soldOut: vars.every((x) => x.soldOut), img: imgId ? imgs[imgId] || null : null, days, bottle: isBottle || undefined,
       ord: (d.categories || [])[0] && (d.categories || [])[0].ordinal || 0,
       _dbg: { ev: d.ecom_visibility, ea: d.ecom_available, vis: d.visibility, ao: d.available_online, ap: d.available_for_pickup, ch: d.channels, ap_ids: d.availability_period_ids, pt: d.product_type, upd: o.updated_at, vtrack: (d.variations||[]).map(v=>{const vd=v.item_variation_data||{};return [vd.track_inventory, vd.sellable, vd.stockable, (vd.location_overrides||[]).map(x=>x.location_id.slice(0,4)+':'+(x.sold_out?'SO':'')+(x.track_inventory?'T':''))]}) },
@@ -186,7 +194,7 @@ async function getMenu(debug) {
   // Bottles go on every regular (not holiday, not pop-up) day that is open or has items.
   const regDays = DAYS.filter((d) => !d.special && !d.popup && (hours[d.key] || items.some((i) => !i.bottle && i.days.includes(d.key)))).map((d) => d.key);
   const bottles = [];
-  items.forEach((i) => { if (i.days.includes('*B')) { i.days = regDays.slice(); bottles.push({ name: i.name, desc: i.desc, price: i.price, img: i.img, soldOut: i.soldOut }); } });
+  items.forEach((i) => { if (i.days.includes('*B')) { i.days = regDays.slice(); bottles.push({ name: i.name, desc: i.desc, chef: i.chef, price: i.price, img: i.img, soldOut: i.soldOut }); } });
   for (let k = items.length - 1; k >= 0; k--) if (!items[k].days.length) items.splice(k, 1);
   // Each flavor once per day: keep the in-stock version if there are duplicates.
   const seen = {};
