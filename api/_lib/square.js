@@ -50,7 +50,7 @@ function fmtTime(t) { // "11:30:00" -> "11:30 AM"
 }
 
 // Builds the live menu: items per day + pickup hours from the location's business hours.
-async function getMenu() {
+async function getMenu(debug) {
   const [objs, loc] = await Promise.all([
     listAll('ITEM,CATEGORY,IMAGE'),
     sq('/v2/locations/' + LOCATION_ID()),
@@ -86,6 +86,7 @@ async function getMenu() {
       id: o.id, varId: v.id, name: (d.name || '').trim(), desc: (d.description_plaintext || d.description || '').trim(),
       price: v.cents / 100, soldOut: vars.every((x) => x.soldOut), img: imgId ? imgs[imgId] || null : null, days,
       ord: (d.categories || [])[0] && (d.categories || [])[0].ordinal || 0,
+      _dbg: { ev: d.ecom_visibility, ea: d.ecom_available, vis: d.visibility, ao: d.available_online, ap: d.available_for_pickup, ch: d.channels, ap_ids: d.availability_period_ids, pt: d.product_type, upd: o.updated_at, vtrack: (d.variations||[]).map(v=>{const vd=v.item_variation_data||{};return [vd.track_inventory, vd.sellable, vd.stockable, (vd.location_overrides||[]).map(x=>x.location_id.slice(0,4)+':'+(x.sold_out?'SO':'')+(x.track_inventory?'T':''))]}) },
     });
   });
 
@@ -95,6 +96,7 @@ async function getMenu() {
     hours[d.key] = (hours[d.key] ? hours[d.key] + ', ' : '') + fmtTime(p.start_local_time) + ' – ' + fmtTime(p.end_local_time);
   });
   const a = L.address || {};
+  if (!debug) items.forEach((i) => delete i._dbg);
   return {
     items,
     hours,

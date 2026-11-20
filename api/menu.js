@@ -4,7 +4,7 @@ const { getMenu, send } = require('./_lib/square');
 const popup = require('../popup.json');
 module.exports = async (req, res) => {
   try {
-    const m = await getMenu();
+    const m = await getMenu(req.query && req.query.debug === '1');
     m.popup = popup && popup.date ? popup : null;
     send(res, 200, m, 'public, s-maxage=60, stale-while-revalidate=300');
   } catch (e) {
