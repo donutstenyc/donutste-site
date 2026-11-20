@@ -5,7 +5,7 @@
   if (!bar || !nav) return;
   var st = document.createElement('style');
   st.textContent =
-    '.mnav-btn{display:none;align-items:center;justify-content:center;gap:8px;height:44px;min-width:44px;padding:0 16px;border-radius:999px;border:1px solid currentColor;background:transparent;color:inherit;font:500 12px/1 var(--body,system-ui);letter-spacing:.18em;text-transform:uppercase;cursor:pointer;margin-left:10px;flex:none}' +
+    '.mnav-btn{display:none;align-items:center;justify-content:center;gap:8px;height:44px;min-width:44px;padding:0 16px;border-radius:999px;border:0;background:#FB5588;color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.18);font:600 12px/1 var(--body,system-ui);letter-spacing:.18em;text-transform:uppercase;cursor:pointer;margin-left:10px;flex:none}' +
     '.mnav-btn i{display:grid;gap:4px}.mnav-btn i b{display:block;width:16px;height:1.5px;background:currentColor}' +
     '@media (max-width:900px){.mnav-btn{display:inline-flex}header .bar{display:flex;align-items:center}header .bar .pill{margin-left:auto;font-size:13px;padding:10px 10px 10px 16px}header .bar > a:first-child img{max-height:52px;width:auto}}' +
     '@media (max-width:420px){header .bar .pill{display:none}.mnav-btn{margin-left:auto}}' +
