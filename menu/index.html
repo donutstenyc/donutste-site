@@ -155,6 +155,16 @@ p.body{color:var(--soft);max-width:44ch;font-size:clamp(15px,1.15vw,17px)}
 footer{padding-top:30px;padding-bottom:40px;font-size:12px;color:var(--soft);display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;border-top:1px solid var(--hair)}
 .rv{opacity:0;transform:translateY(24px);transition:opacity .9s,transform .9s}.rv.in{opacity:1;transform:none}
 @media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}.draw path,.draw circle,.draw ellipse,.draw rect{stroke-dashoffset:0;transition:none}}
+.boxrow .opts{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.boxrow .opt{font:inherit;font-size:12px;letter-spacing:.12em;text-transform:uppercase;background:none;border:1px solid var(--hair);color:var(--soft);border-radius:999px;padding:9px 16px;cursor:pointer}
+.boxrow .opt.on{border-color:var(--ink);color:var(--ink);background:rgba(0,0,0,.03)}
+.boxrow .opt:disabled{opacity:.4;cursor:default}
+.boxrow .inbox{padding:0 0 clamp(22px,3vw,34px) calc(56px + clamp(14px,3vw,40px));max-width:980px}
+.boxrow .inbox h4{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--soft);font-weight:400;margin:0 0 10px}
+.boxrow .inbox ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px 28px}
+.boxrow .inbox li{font-size:15px;line-height:1.5;color:var(--soft)}
+.boxrow .inbox li b{display:block;font-family:var(--display);font-weight:400;font-size:22px;color:var(--ink);text-transform:uppercase}
+@media (max-width:700px){.boxrow .inbox{padding-left:0}}
 </style></head>
 <body>
 <header class="wrap" id="hd"><div class="bar"><a href="/" aria-label="Donutste"><img src="navlogo.webp" alt="Donutste Doughnuts"></a>
@@ -282,16 +292,26 @@ function rowHTML(it,i,d){var n=notesFor(it);
   '<div class="rt"><div class="mini">'+n.map(function(k){return svg(k)}).join('')+'</div><span class="price">'+money(it.price)+'</span><span class="c">'+ctl(it,d)+'</span></div></div>'+
   '<div class="more"><div><div class="inner"><div class="art">'+(it.img?'<img src="'+it.img+'" alt="'+it.name+'" loading="lazy">':'<div class="big">'+n.map(function(k){return svg(k,'in')}).join('')+'</div>')+'</div>'+
   '<div class="txt"><h4>The flavor</h4><p>'+String(it.desc||'').replace(/\n+/g,'<br>')+'</p><h4>Notes</h4><ul>'+n.map(function(k){return '<li>'+LABEL[k]+'</li>'}).join('')+'</ul>'+(it.chef?'<h4>Chef&rsquo;s note</h4><p class="chef">'+it.chef+'</p>':'')+(it.soldOut?'':'<button type="button" class="pill big add2" data-d="'+d+'" data-n="'+it.name+'">Add to box <i></i></button>')+'</div></div></div></div></article>'}
+var SEL={};
+function boxContents(desc){return String(desc||'').split(/\n+/).map(function(l){return l.trim()}).filter(function(l){return l&&!/pick-?\s?up|box of|substitut/i.test(l)}).map(function(l){var m=l.match(/^([^:\-–]{2,60}?)\s*[:\-–]\s+(.*)$/);return '<li>'+(m?'<b>'+m[1]+'</b> '+m[2]:l)+'</li>'}).join('')}
+function boxRowHTML(it,opts,i,d){var sel=opts.filter(function(o){return o.name===SEL[it.group]})[0]||opts.filter(function(o){return !o.soldOut})[0]||opts[0];SEL[it.group]=sel.name;
+  var c=boxContents(it.desc);
+  return '<article class="item in boxrow"><div class="top"><span class="no">'+String(i+1).padStart(2,'0')+'</span><div><h3>'+it.group+'</h3>'+
+  '<div class="opts" role="radiogroup" aria-label="How many boxes">'+opts.map(function(o){return '<button type="button" role="radio" aria-checked="'+(o===sel)+'" class="opt'+(o===sel?' on':'')+'" data-g="'+it.group+'" data-n="'+o.name+'"'+(o.soldOut?' disabled':'')+'>'+o.opt.replace(/^1 Box/i,'1 box').replace(/Boxes/,'boxes')+(o.soldOut?' (sold out)':'')+'</button>'}).join('')+'</div></div>'+
+  '<div class="rt"><span class="price">'+money(sel.price)+'</span><span class="c">'+ctl(sel,d)+'</span></div></div>'+
+  (c?'<div class="inbox"><h4>In the box</h4><ul>'+c+'</ul></div>':'')+'</article>'}
 var drawn={};
 function render(){
   menu.innerHTML=Object.keys(DAYS).map(function(d){var D=DAYS[d],shown=ITEMS.filter(function(it){return it.days.indexOf(d)>=0}),dt=dateFor(D);
     var notes=[];shown.forEach(function(it){notesFor(it).forEach(function(k){if(k!=='wheat'&&notes.indexOf(k)<0)notes.push(k)})});notes=notes.slice(0,5);
     var when=D.popup?(POPUP?'<b>'+fmt(dt)+'</b> &middot; '+POPUP.hours+'<br>'+[POPUP.place,POPUP.addr].filter(Boolean).join(' &middot; '):'The day and the place change every time.'):'Pickup <b>'+fmt(dt)+'</b> &middot; '+D.hours+'<br>Lake Mary';
-    var body=shown.length?shown.map(function(it,i){return rowHTML(it,i,d)}).join('')+(d==='Wed'&&!LIVE?'<p class="src">Preview: this week&rsquo;s Wednesday flyer. Every day loads live from Square at launch.</p>':''):
+    var seenG={},rows=shown.filter(function(it){if(!it.group)return true;if(seenG[it.group])return false;seenG[it.group]=1;return true});
+    var body=shown.length?rows.map(function(it,i){return it.group?boxRowHTML(it,shown.filter(function(x){return x.group===it.group}),i,d):rowHTML(it,i,d)}).join('')+(d==='Wed'&&!LIVE?'<p class="src">Preview: this week&rsquo;s Wednesday flyer. Every day loads live from Square at launch.</p>':''):
       (LOADING?'<div class="empty">Loading this week&rsquo;s menu&hellip;</div>':'<div class="empty">'+(D.popup?(POPUP?'The pop-up menu posts soon.':'The next pop-up is being planned.'):'This week&rsquo;s '+D.name+' menu posts soon.')+(D.popup?'<small>Date, place and flavors appear here once it is set</small>':'')+'</div>');
     return '<section class="dsec" id="d-'+d+'"><div class="dhd"><div><div class="kicker">'+(D.popup?'Pop-up &middot; Dates &amp; places vary':'Pre-order &middot; '+D.name+' pickup')+'</div><h2>'+D.name+'<em>.</em></h2><p class="when">'+when+'</p></div>'+
       (notes.length?'<div class="sks">'+notes.map(function(k){return '<figure>'+svg(k,drawn[d]?'in':'')+'<figcaption>'+LABEL[k]+'</figcaption></figure>'}).join('')+'</div>':'')+'</div>'+body+'</section>'}).join('');
   menu.querySelectorAll('.item').forEach(function(el){function t(e){if(e.target.closest('button,a'))return;var o=el.classList.toggle('open');el.setAttribute('aria-expanded',o)}el.addEventListener('click',t);el.addEventListener('keydown',function(e){if(e.target!==el)return;if(e.key==='Enter'||e.key===' '){e.preventDefault();t(e)}})});
+  menu.querySelectorAll('.opt').forEach(function(b){b.addEventListener('click',function(){SEL[b.dataset.g]=b.dataset.n;render()})});
   menu.querySelectorAll('.add,.add2').forEach(function(b){b.addEventListener('click',function(){change(b.dataset.d,b.dataset.n,1)})});
   menu.querySelectorAll('.step button').forEach(function(b){b.addEventListener('click',function(){change(b.parentNode.dataset.d,b.parentNode.dataset.n,+b.dataset.a)})});
   menu.querySelectorAll('.dhd .sks').forEach(function(s){if(!s.querySelector('.draw.in'))sio.observe(s)});

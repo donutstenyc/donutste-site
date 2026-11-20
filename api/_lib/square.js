@@ -116,7 +116,7 @@ async function getMenu(debug) {
       const raw0 = cleanName((d.name || '').trim()).name.replace(/thanks\s+giving/ig, 'Thanksgiving');
       const imgId0 = (d.image_ids || [])[0];
       vars.forEach((vv) => items.push({
-        id: o.id, varId: vv.id, name: raw0 + (vars.length > 1 ? ' · ' + vv.name.replace(/^quantity:\s*/i, '') : ''),
+        id: o.id, varId: vv.id, group: raw0, opt: vv.name.replace(/^quantity:\s*/i, ''), name: raw0 + (vars.length > 1 ? ' · ' + vv.name.replace(/^quantity:\s*/i, '') : ''),
         desc: (d.description_plaintext || d.description || '').trim(), price: vv.cents / 100, soldOut: vv.soldOut,
         img: imgId0 ? imgs[imgId0] || null : null, days: special, ord: 0,
       }));
