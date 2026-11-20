@@ -3,6 +3,7 @@
 const { sq, LOCATION_ID, POPUP_LOCATION_ID, uid, getMenu, zonedISO, todayIn, send, readBody } = require('./_lib/square');
 const manualPopup = require('../popup.json');
 const { findDiscount } = require('./_lib/discount');
+const { sendMail, orderEmail } = require('./_lib/mail');
 const MAX_DAYS_AHEAD = 21;
 
 module.exports = async (req, res) => {
@@ -63,9 +64,25 @@ module.exports = async (req, res) => {
     } });
     const o = order.order;
 
+    const confirm = async (receiptUrl) => {
+      try {
+        const [yy, mo, dd] = date.split('-').map(Number);
+        const dateLabel = new Date(Date.UTC(yy, mo - 1, dd)).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', timeZone: 'UTC' });
+        const disc0 = (o.discounts || [])[0];
+        await sendMail(email, 'Your Donutste order · pickup ' + dateLabel, orderEmail({
+          name, dayName: D.popup ? 'at the pop-up' : D.name, dateLabel,
+          hours: D.popup ? (popup.hours || '') : (menu.hours[day] || ''),
+          addr: D.popup ? (popup.addr || '') : (menu.address || ''),
+          lines: (o.line_items || []).map((l) => ({ qty: l.quantity, name: l.name, amount: Number(l.gross_sales_money.amount) / 100 })),
+          total: Number(o.total_money.amount) / 100,
+          discountName: disc0 && disc0.name, discountOff: Number((o.total_discount_money || {}).amount || 0) / 100, receiptUrl,
+        }));
+      } catch (e) { console.error('mail', e.message); }
+    };
     if (Number(o.total_money.amount) === 0) {
       // Fully discounted: close the order with no charge.
       await sq('/v2/orders/' + o.id + '/pay', { method: 'POST', body: { idempotency_key: uid(), order_version: o.version, payment_ids: [] } });
+      await confirm('');
       return send(res, 200, { ok: true, orderId: o.id, total: 0, receiptUrl: '', pickupAt });
     }
     if (!sourceId) {
@@ -82,6 +99,7 @@ module.exports = async (req, res) => {
       throw e;
     });
 
+    await confirm(pay.payment && pay.payment.receipt_url);
     send(res, 200, { ok: true, orderId: o.id, total: Number(o.total_money.amount) / 100, receiptUrl: pay.payment && pay.payment.receipt_url, pickupAt });
   } catch (e) {
     console.error('checkout', e.message, JSON.stringify(e.square || ''));
