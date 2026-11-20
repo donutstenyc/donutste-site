@@ -116,6 +116,9 @@ p.body{color:var(--soft);max-width:44ch;font-size:clamp(15px,1.15vw,17px)}
 .drawer label{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--soft);display:grid;gap:6px}
 .drawer input{font:400 15px var(--body);border:1px solid var(--hair);border-radius:12px;padding:12px 14px;background:#fff;color:var(--ink)}
 .card{border:1px dashed #D8C6B4;border-radius:12px;padding:16px;font-size:13px;color:var(--soft);text-align:center}
+.code{display:flex;gap:8px}.code input{flex:1;min-width:0}.code button,.meth button{font:500 12px var(--body);letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--ink);background:transparent;color:var(--ink);border-radius:999px;padding:0 16px;cursor:pointer}
+.meth{display:flex;gap:8px}.meth button{padding:10px 14px;flex:1}.meth button.on{background:var(--ink);color:var(--cream)}
+.lines li.dl{color:var(--pink)}
 .drawer .pay{width:100%;justify-content:center;font-size:15px;padding:15px 12px 15px 24px}
 .done{text-align:center;padding-top:30px}.done h3{font-size:54px}.done p{color:var(--soft)}
 /* DAY SECTIONS */
@@ -271,7 +274,8 @@ var box={day:null,q:{}};
 var menu=document.getElementById('menu');
 function money(n){return '$'+n.toFixed(2)}
 function boxCount(){var c=0;for(var k in box.q)c+=box.q[k];return c}
-function boxTotal(){var t=0;ITEMS.forEach(function(it){t+=(box.q[it.name]||0)*it.price});return t}
+function boxItems(){return ITEMS.filter(function(it){return box.q[it.name]&&it.days.indexOf(box.day)>=0})}
+function boxTotal(){var t=0;boxItems().forEach(function(it){t+=(box.q[it.name]||0)*it.price});return t}
 function ctl(it,d){if(it.soldOut)return '<span class="add" style="opacity:.45;cursor:default">Sold out</span>';var q=box.day===d?(box.q[it.name]||0):0;return q?'<span class="step" data-d="'+d+'" data-n="'+it.name+'"><button type="button" data-a="-1" aria-label="Remove one">&minus;</button><span>'+q+'</span><button type="button" data-a="1" aria-label="Add one">+</button></span>':'<button type="button" class="add" data-d="'+d+'" data-n="'+it.name+'">Add</button>'}
 function rowHTML(it,i,d){var n=notesFor(it);
   return '<article class="item in" tabindex="0" aria-expanded="false"><div class="top"><span class="no">'+String(i+1).padStart(2,'0')+'</span><div><h3>'+it.name+'</h3><div class="notes">'+n.map(function(k){return LABEL[k]}).join(' &middot; ')+'</div>'+(it.tag?'<div class="days"><span class="tag">'+it.tag+'</span></div>':'')+'</div>'+
@@ -313,26 +317,35 @@ function loadSquare(){if(SQ)return SQ;SQ=fetch('/api/config').then(function(r){r
 document.getElementById('cobtn').addEventListener('click',function(e){e.preventDefault();var D=DAYS[box.day],dt=dateFor(D);
   pn.innerHTML='<button class="x" type="button" data-close aria-label="Close">&times;</button><div class="kicker">Checkout</div><h3>Your box</h3>'+
   '<div class="pick"><b>Pickup '+fmt(dt)+'</b><span>'+hoursFor(D)+' &middot; '+addrFor(D)+'</span></div>'+
-  '<ul class="lines">'+ITEMS.filter(function(it){return box.q[it.name]}).map(function(it){return '<li><span>'+box.q[it.name]+' &times; '+it.name+'</span><span>'+money(box.q[it.name]*it.price)+'</span></li>'}).join('')+'<li class="t"><span>Total</span><span>'+money(boxTotal())+'</span></li></ul>'+
+  '<ul class="lines">'+boxItems().map(function(it){return '<li><span>'+box.q[it.name]+' &times; '+it.name+'</span><span>'+money(box.q[it.name]*it.price)+'</span></li>'}).join('')+'<li class="dl" id="dline" style="display:none"></li><li class="t"><span>Total</span><span id="ctot">'+money(boxTotal())+'</span></li></ul>'+
+  '<div class="code"><input id="ccode" placeholder="Discount code" autocomplete="off" aria-label="Discount code"><button type="button" id="capply">Apply</button></div><p id="cmsg" style="font-size:12px;margin:-8px 0 0;color:var(--soft);min-height:1em"></p>'+
   '<label>Name<input autocomplete="name" id="cn"></label><label>Email<input type="email" autocomplete="email" id="ce"></label><label>Phone<input type="tel" autocomplete="tel" id="cp"></label>'+
-  '<div class="card" id="cardbox">'+(LIVE?'Loading secure card form&hellip;':'Square secure card form appears here on donutste.com')+'</div><p class="err" id="cerr" style="color:#B3261E;font-size:13px;margin:0;min-height:1em"></p>'+
+  '<div class="meth" role="tablist"><button type="button" class="on" data-m="card">Card</button><button type="button" data-m="gift">Donutste gift card</button></div><div class="card" id="cardbox">'+(LIVE?'Loading secure card form&hellip;':'Square secure card form appears here on donutste.com')+'</div><div class="card" id="giftbox" style="display:none"></div><p class="err" id="cerr" style="color:#B3261E;font-size:13px;margin:0;min-height:1em"></p>'+
   '<button class="pill pay" type="button" id="pay">Pay '+money(boxTotal())+' <i></i></button><p style="font-size:11px;color:var(--soft);margin:0;text-align:center">Payments are processed securely by Square.</p>';
   pn.querySelector('.x').addEventListener('click',closeD);
   dr.classList.add('show');
-  card=null;
-  if(LIVE)loadSquare().then(function(pay){return pay.card().then(function(c){var cb=document.getElementById('cardbox');if(!cb)return;cb.innerHTML='';cb.style.border='0';cb.style.padding='0';return c.attach('#cardbox').then(function(){card=c})})}).catch(function(){var cb=document.getElementById('cardbox');if(cb)cb.textContent='Card form could not load. Please refresh and try again.'});
+  card=null;var gcard=null,meth='card',code='',total=boxTotal();
+  pn.querySelectorAll('.meth button').forEach(function(b){b.addEventListener('click',function(){meth=b.dataset.m;pn.querySelectorAll('.meth button').forEach(function(x){x.classList.toggle('on',x===b)});document.getElementById('cardbox').style.display=meth==='card'?'':'none';document.getElementById('giftbox').style.display=meth==='gift'?'':'none'})});
+  if(LIVE)loadSquare().then(function(pay){pay.giftCard().then(function(g){var gb=document.getElementById('giftbox');if(!gb)return;gb.style.border='0';gb.style.padding='0';return g.attach('#giftbox').then(function(){gcard=g})}).catch(function(){});return pay.card().then(function(c){var cb=document.getElementById('cardbox');if(!cb)return;cb.innerHTML='';cb.style.border='0';cb.style.padding='0';return c.attach('#cardbox').then(function(){card=c})})}).catch(function(){var cb=document.getElementById('cardbox');if(cb)cb.textContent='Card form could not load. Please refresh and try again.'});
   var payBtn=document.getElementById('pay'),err=document.getElementById('cerr');
+  function lines(){return boxItems().map(function(it){return {varId:it.varId,qty:box.q[it.name]}})}
+  document.getElementById('capply').addEventListener('click',function(){var c=document.getElementById('ccode').value.trim(),cm=document.getElementById('cmsg'),dl=document.getElementById('dline');
+    if(!c){code='';total=boxTotal();dl.style.display='none';document.getElementById('ctot').textContent=money(total);payBtn.firstChild.nodeValue='Pay '+money(total)+' ';cm.textContent='';return}
+    if(!LIVE){cm.textContent='Codes are checked with Square on donutste.com.';return}
+    cm.textContent='Checking…';fetch('/api/discount',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:c,day:box.day,lines:lines()})}).then(function(r){return r.json().then(function(j){if(!r.ok||!j.ok)throw j;
+      code=c;total=j.total;dl.style.display='';dl.innerHTML='<span>'+j.name+'</span><span>&minus;'+money(j.off)+'</span>';document.getElementById('ctot').textContent=money(total);payBtn.firstChild.nodeValue='Pay '+money(total)+' ';cm.textContent='Code applied.'})})
+    .catch(function(j){code='';cm.textContent=(j&&j.error)||'That code isn’t valid.'})});
   payBtn.addEventListener('click',function(){
     var nm=document.getElementById('cn').value.trim(),em=document.getElementById('ce').value.trim(),ph=document.getElementById('cp').value.trim();
     if(!nm||!/.+@.+\..+/.test(em)||ph.replace(/\D/g,'').length<10){err.textContent='Please add your name, email and phone number.';return}
     function done(rec){pn.innerHTML='<button class="x" type="button" aria-label="Close">&times;</button><div class="done"><div class="kicker" style="justify-content:center">Order placed</div><h3>See you<br><em style="font-style:italic;text-transform:none;color:var(--pink)">'+D.name+'.</em></h3><p>Pickup '+fmt(dt)+'<br>'+hoursFor(D)+'<br>'+addrFor(D)+'</p><p style="font-size:12px">'+(rec?'A receipt is on its way to your email. <a href="'+rec+'" target="_blank" rel="noopener" style="text-decoration:underline">View receipt</a>':'(Preview: no real order was placed.)')+'</p></div>';
       pn.querySelector('.x').addEventListener('click',function(){box={day:null,q:{}};closeD();render()})}
     if(!LIVE){done('');return}
-    if(!card){err.textContent='The card form is still loading.';return}
+    var src=meth==='gift'?gcard:card;
+    if(!src){err.textContent='The payment form is still loading.';return}
     err.textContent='';payBtn.disabled=true;payBtn.style.opacity=.6;
-    card.tokenize().then(function(t){if(t.status!=='OK')throw {msg:'Please check your card details.'};
-      return fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({day:box.day,date:ymd(dt),name:nm,email:em,phone:ph,sourceId:t.token,
-        lines:ITEMS.filter(function(it){return box.q[it.name]}).map(function(it){return {varId:it.varId,qty:box.q[it.name]}})})})})
+    src.tokenize().then(function(t){if(t.status!=='OK')throw {msg:meth==='gift'?'Please check your gift card number.':'Please check your card details.'};
+      return fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({day:box.day,date:ymd(dt),name:nm,email:em,phone:ph,sourceId:t.token,code:code||undefined,lines:lines()})})})
     .then(function(r){return r.json().then(function(j){if(!r.ok||!j.ok)throw {msg:j.error};done(j.receiptUrl||' ')})})
     .catch(function(x){err.textContent=(x&&x.msg)||'Something went wrong. Please try again.';payBtn.disabled=false;payBtn.style.opacity=1})});
 });

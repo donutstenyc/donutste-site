@@ -120,6 +120,8 @@ async function getMenu(debug) {
     const d = DAYS.find((d) => d.sq === p.day_of_week); if (!d) return;
     hours[d.key] = (hours[d.key] ? hours[d.key] + ', ' : '') + fmtTime(p.start_local_time) + ' – ' + fmtTime(p.end_local_time);
   });
+  // Manual pickup hours (hours.json) win over the location's business hours, e.g. "11:30 AM – 1:30 PM".
+  try { const H = require('../../hours.json'); Object.keys(H).forEach((k) => { if (H[k]) hours[k] = H[k]; }); } catch (_) {}
   const a = L.address || {};
   // Pop-up: date, hours and place come from the pop-up location's business hours + address in Square.
   let popup = null;

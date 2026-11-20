@@ -2,13 +2,14 @@
 // Prices always come from Square (catalog ids), never from the browser.
 const { sq, LOCATION_ID, POPUP_LOCATION_ID, uid, getMenu, zonedISO, todayIn, send, readBody } = require('./_lib/square');
 const manualPopup = require('../popup.json');
+const { findDiscount } = require('./_lib/discount');
 const MAX_DAYS_AHEAD = 21;
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return send(res, 405, { error: 'POST only' });
   try {
     const b = await readBody(req);
-    const { day, date, lines, name, email, phone, sourceId, verificationToken } = b;
+    const { day, date, lines, name, email, phone, sourceId, verificationToken, code } = b;
     if (!sourceId) return send(res, 400, { error: 'Payment details missing.' });
     if (!name || !email || !phone) return send(res, 400, { error: 'Please add your name, email and phone.' });
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date || '')) return send(res, 400, { error: 'Pickup date missing.' });
@@ -40,6 +41,8 @@ module.exports = async (req, res) => {
     const pickupAt = zonedISO(date, start, tz);
     const LOC = D.popup ? POPUP_LOCATION_ID() : LOCATION_ID();
 
+    let disc = null;
+    if (code) { disc = await findDiscount(code, LOC); if (!disc) return send(res, 400, { error: 'That discount code isn’t valid.' }); }
     const order = await sq('/v2/orders', { method: 'POST', body: {
       idempotency_key: uid(),
       order: {
@@ -47,6 +50,7 @@ module.exports = async (req, res) => {
         reference_id: 'web-' + date,
         source: { name: 'donutste.com' },
         line_items: items.map((l) => ({ catalog_object_id: l.varId, quantity: String(Math.floor(l.qty)) })),
+        discounts: disc ? [{ catalog_object_id: disc.id, scope: 'ORDER' }] : undefined,
         fulfillments: [{
           type: 'PICKUP', state: 'PROPOSED',
           pickup_details: {
@@ -73,6 +77,7 @@ module.exports = async (req, res) => {
   } catch (e) {
     console.error('checkout', e.message, JSON.stringify(e.square || ''));
     const card = e.square && e.square.find((x) => x.category === 'PAYMENT_METHOD_ERROR');
-    send(res, card ? 402 : 500, { error: card ? 'Your card was declined. Please try another card.' : 'We couldn’t place the order. Please try again.' });
+    const low = e.square && e.square.find((x) => x.code === 'INSUFFICIENT_FUNDS');
+    send(res, card ? 402 : 500, { error: low ? 'There isn’t enough on that card to cover this order.' : card ? 'Your card was declined. Please try another card.' : 'We couldn’t place the order. Please try again.' });
   }
 };
