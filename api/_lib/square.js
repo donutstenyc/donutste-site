@@ -118,9 +118,12 @@ async function getMenu(debug) {
     const isBottle = catIds.some((c) => /^bottled\b/i.test((cats[c] || '').trim()));
     if (isBottle && !days.length) days.push('*B');
     if (!days.length) { if (debug && d.ecom_visibility === 'VISIBLE') (globalThis.__nod = globalThis.__nod || []).push(d.name + ' [' + catIds.map((c) => cats[c]).join(', ') + ']'); return; }
+    // Sold out comes from the location the item is sold at: pop-up-only items read the pop-up location,
+    // everything else reads the main location.
+    const soldLoc = PID !== L.id && days.length && days.every((k) => k === 'Pop') ? PID : L.id;
     const vars = (d.variations || []).filter((v) => !v.is_deleted && here(v)).map((v) => {
       const vd = v.item_variation_data || {};
-      const ov = (vd.location_overrides || []).find((x) => x.location_id === L.id) || {};
+      const ov = (vd.location_overrides || []).find((x) => x.location_id === soldLoc) || {};
       return { id: v.id, name: vd.name || '', cents: vd.price_money ? Number(vd.price_money.amount) : null, soldOut: !!ov.sold_out };
     }).filter((v) => v.cents != null);
     if (!vars.length) return;
