@@ -405,7 +405,7 @@ button.po-day:focus-visible{outline:2px solid var(--pink);outline-offset:4px}
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-  function next(dow){var d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()+((dow-d.getDay()+7)%7||7));return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});}
+  function next(dow,hours){var n=new Date(),d=new Date();d.setHours(12,0,0,0);var k=(dow-d.getDay()+7)%7,a=String(hours||'').match(/(\d{1,2})(?::(\d{2}))?\s*(AM|PM)/gi),e=null;if(a){var m=a[a.length-1].match(/(\d{1,2})(?::(\d{2}))?\s*(AM|PM)/i);e=(+m[1]%12+(/pm/i.test(m[3])?12:0))*60+(+(m[2]||0))}if(k===0&&!(e!=null&&n.getHours()*60+n.getMinutes()<e))k=7;d.setDate(d.getDate()+k);return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});}
   document.getElementById('wed').textContent=next(3);var _s=document.getElementById('sat');if(_s)_s.textContent=next(6);
   document.getElementById('thu').textContent=next(4);
   // Black Friday gift card banner: shows only between promo.json start and end dates.
@@ -419,7 +419,7 @@ button.po-day:focus-visible{outline:2px solid var(--pink);outline-offset:4px}
       if(ymd<=sp.date){var h=document.getElementById('holiday');h.hidden=false;h.querySelector('.hol-cta').href='/menu/#d-'+sp.key;
         document.getElementById('holwhen').textContent='Pickup '+new Date(sp.date+'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})+(m.hours&&m.hours[sp.key]?', '+m.hours[sp.key]:'')+' in Lake Mary.'}}
     m.days=m.days.filter(function(x){return !x.special});var el=document.getElementById('podays');
-    el.innerHTML=m.days.map(function(x){return x.popup?'<a class="po-day" href="/menu/#d-Pop"><span class="po-label">Pop-up</span><span class="po-date">'+(m.popup&&m.popup.date?new Date(m.popup.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}):'Varies')+'</span><span class="po-cta">Where next <i></i></span></a>':'<a class="po-day" href="/menu/#d-'+x.key+'"><span class="po-label">'+x.name+' pickup</span><span class="po-date">'+next(x.dow)+'</span><span class="po-cta">See the menu <i></i></span></a>'}).join('');
+    el.innerHTML=m.days.map(function(x){return x.popup?'<a class="po-day" href="/menu/#d-Pop"><span class="po-label">Pop-up</span><span class="po-date">'+(m.popup&&m.popup.date?new Date(m.popup.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}):'Varies')+'</span><span class="po-cta">Where next <i></i></span></a>':'<a class="po-day" href="/menu/#d-'+x.key+'"><span class="po-label">'+x.name+' pickup</span><span class="po-date">'+next(x.dow,m.hours&&m.hours[x.key])+'</span><span class="po-cta">See the menu <i></i></span></a>'}).join('');
     el.style.setProperty('--n',Math.min(m.days.length,5));}).catch(function(){});
   document.querySelectorAll('button.po-day').forEach(function(btn){btn.addEventListener('click',function(){document.querySelectorAll('button.po-day').forEach(function(x){x.classList.toggle('on',x===btn);x.setAttribute('aria-selected',x===btn)});});});
 })();

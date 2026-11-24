@@ -286,10 +286,12 @@ var DAYS={
 // the pop-up's flavors come from Square category "Pop-up". Each Square category (Wednesday/Thursday/Saturday/Pop-up) fills its own section.
 // Example once set: POPUP={date:'2026-12-05',hours:'10 AM – 2 PM',place:'Venue name',addr:'Street, City'}
 var POPUP=null;
-function dateFor(D){if(D.date){var q=D.date.split('-');return new Date(+q[0],q[1]-1,+q[2])}if(D.popup){if(!POPUP)return null;var p=POPUP.date.split('-');return new Date(+p[0],p[1]-1,+p[2])}return nextDate(D.dow)}
+function dateFor(D){if(D.date){var q=D.date.split('-');return new Date(+q[0],q[1]-1,+q[2])}if(D.popup){if(!POPUP)return null;var p=POPUP.date.split('-');return new Date(+p[0],p[1]-1,+p[2])}return nextDate(D.dow,D.hours)}
 function hoursFor(D){return D.popup?(POPUP?POPUP.hours:''):D.hours}
 function addrFor(D){return D.popup?(POPUP?[POPUP.place,POPUP.addr].filter(Boolean).join(', '):''):D.addr}
-function nextDate(dow){var d=new Date();d.setHours(0,0,0,0);var k=(dow-d.getDay()+7)%7;if(k===0)k=7;d.setDate(d.getDate()+k);return d}
+function endHM(h){var a=String(h||'').match(/(\d{1,2})(?::(\d{2}))?\s*(AM|PM)/gi);if(!a)return null;var m=a[a.length-1].match(/(\d{1,2})(?::(\d{2}))?\s*(AM|PM)/i);return (+m[1]%12+(/pm/i.test(m[3])?12:0))*60+(+(m[2]||0))}
+// Today stays the pickup date until today's pickup hours have ended.
+function nextDate(dow,hours){var n=new Date(),d=new Date();d.setHours(0,0,0,0);var k=(dow-d.getDay()+7)%7,e=endHM(hours);if(k===0&&!(e!=null&&n.getHours()*60+n.getMinutes()<e))k=7;d.setDate(d.getDate()+k);return d}
 function fmt(d){return d.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'})}
 function short(d){return d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}
 var box={day:null,q:{}};

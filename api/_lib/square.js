@@ -178,7 +178,7 @@ async function getMenu(debug) {
     const today = todayIn(tz);
     const codes = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
     // Today counts until today's pop-up hours have ended (local time), then it rolls to the next date.
-    const nowHM = new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date());
+    const nowHM = nowIn(tz);
     for (let k = 0; k <= 14 && !popup; k++) {
       const [y, m, d] = today.split('-').map(Number);
       const dt = new Date(Date.UTC(y, m - 1, d + k));
@@ -189,6 +189,7 @@ async function getMenu(debug) {
           date: dt.toISOString().slice(0, 10),
           hours: ps.map((p) => fmtTime(p.start_local_time) + ' – ' + fmtTime(p.end_local_time)).join(', '),
           start: ps[0].start_local_time.slice(0, 5),
+          end: ps[ps.length - 1].end_local_time.slice(0, 5),
           place: '',
           addr: [pa.address_line_1, pa.locality].filter(Boolean).join(', '),
         };
@@ -237,6 +238,17 @@ function zonedISO(dateStr, timeStr, tz) {
   const asLocal = Date.UTC(+g.year, +g.month - 1, +g.day, +g.hour % 24, +g.minute);
   return new Date(guess - (asLocal - guess)).toISOString();
 }
+// Current local time "HH:MM" (24h) in the business time zone.
+function nowIn(tz) {
+  return new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date());
+}
+// Last end time in an hours string like "11:30 AM – 1:30 PM" -> "13:30" (null if none).
+function endOfHours(str) {
+  const all = [...String(str || '').matchAll(/(\d{1,2})(?::(\d{2}))?\s*(AM|PM)/gi)];
+  if (!all.length) return null;
+  const mm = all[all.length - 1]; const H = (+mm[1] % 12) + (/pm/i.test(mm[3]) ? 12 : 0);
+  return String(H).padStart(2, '0') + ':' + (mm[2] || '00');
+}
 function todayIn(tz) {
   return new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
 }
@@ -252,4 +264,4 @@ async function readBody(req) {
   let s = ''; for await (const c of req) s += c; try { return JSON.parse(s || '{}'); } catch { return {}; }
 }
 
-module.exports = { sq, ENV, LOCATION_ID, POPUP_LOCATION_ID, uid, DAYS, getMenu, zonedISO, todayIn, send, readBody };
+module.exports = { sq, ENV, LOCATION_ID, POPUP_LOCATION_ID, uid, DAYS, getMenu, zonedISO, todayIn, nowIn, endOfHours, send, readBody };

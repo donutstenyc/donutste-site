@@ -1,6 +1,6 @@
 // Creates a Square order for the EXACT pickup date the customer chose, then charges it.
 // Prices always come from Square (catalog ids), never from the browser.
-const { sq, LOCATION_ID, POPUP_LOCATION_ID, uid, getMenu, zonedISO, todayIn, send, readBody } = require('./_lib/square');
+const { sq, LOCATION_ID, POPUP_LOCATION_ID, uid, getMenu, zonedISO, todayIn, nowIn, endOfHours, send, readBody } = require('./_lib/square');
 const manualPopup = require('../popup.json');
 const { findDiscount } = require('./_lib/discount');
 const { sendMail, orderEmail } = require('./_lib/mail');
@@ -21,9 +21,11 @@ module.exports = async (req, res) => {
     const D = menu.days.find((d) => d.key === day);
     if (!D) return send(res, 400, { error: 'Unknown pickup day.' });
 
-    // The date must be a real upcoming pickup day (strictly after today, matching the weekday, or the pop-up date).
-    const today = todayIn(tz);
-    if (date <= today) return send(res, 400, { error: 'That pickup day has closed for orders. Please choose the next one.' });
+    // The date must be a real upcoming pickup day (matching the weekday, or the pop-up date).
+    // Today still counts until that day's pickup hours have ended.
+    const today = todayIn(tz), nowHM = nowIn(tz);
+    const endToday = D.popup ? popup.end || endOfHours(popup.hours) : endOfHours(menu.hours[day]);
+    if (date < today || (date === today && !(endToday && nowHM < endToday))) return send(res, 400, { error: 'That pickup day has closed for orders. Please choose the next one.' });
     const [y, m, d] = date.split('-').map(Number);
     const wd = new Date(Date.UTC(y, m - 1, d)).getUTCDay();
     if (D.popup) { if (!popup.date || popup.date !== date) return send(res, 400, { error: 'This pop-up is not taking orders.' }); }
@@ -40,6 +42,8 @@ module.exports = async (req, res) => {
     const h = D.popup ? popup.start : null;
     if (h) start = h;
     else if (menu.hours[day]) { const mm = menu.hours[day].match(/(\d+)(?::(\d+))?\s*(AM|PM)/); if (mm) { let H = +mm[1] % 12 + (mm[3] === 'PM' ? 12 : 0); start = String(H).padStart(2, '0') + ':' + (mm[2] || '00'); } }
+    // Same-day order after the start time: pick up as soon as possible (now + 15 min), still within the hours.
+    if (date === today && start <= nowHM) { const t = new Date(Date.now() + 15 * 60e3); start = new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(t); }
     const pickupAt = zonedISO(date, start, tz);
     const LOC = D.popup ? POPUP_LOCATION_ID() : LOCATION_ID();
 
