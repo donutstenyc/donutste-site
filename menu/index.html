@@ -384,14 +384,22 @@ document.getElementById('cobtn').addEventListener('click',function(e){e.preventD
     src.tokenize().then(function(t){if(t.status!=='OK')throw {msg:meth==='gift'?'Please check your gift card number.':'Please check your card details.'};
       return fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({day:box.day,date:ymd(dt),name:nm,email:em,phone:ph,sourceId:t.token||undefined,code:code||undefined,lines:lines()})})})
     .then(function(r){return r.json().then(function(j){if(!r.ok||!j.ok)throw {msg:j.error};done(j.receiptUrl||' ')})})
-    .catch(function(x){err.textContent=(x&&x.msg)||'Something went wrong. Please try again.';payBtn.disabled=false;payBtn.style.opacity=1})});
+    .catch(function(x){err.textContent=(x&&x.msg)||'Something went wrong. Please try again.';if(x&&/not taking orders|closed for orders|no longer available|does not match/i.test(x.msg||'')&&typeof loadMenu==='function'){lastChk=Date.now();loadMenu(false);err.textContent+=' We just refreshed the menu, please check your pickup date and try again.'}payBtn.disabled=false;payBtn.style.opacity=1})});
 });
-if(LIVE)fetch('/api/menu').then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(m){
+// Open tabs re-check the menu (dates, pop-up, stock) when they come back into view and every 5 minutes,
+// so an old tab never keeps a stale pickup date. It only re-draws when something actually changed.
+var MSIG='';
+function loadMenu(first){return fetch('/api/menu'+(first?'':'?r='+Date.now())).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(m){
+  var sig=JSON.stringify([m.days,m.popup,m.hours,(m.items||[]).map(function(i){return [i.varId,i.soldOut,i.days]})]);
+  if(!first&&sig===MSIG)return;MSIG=sig;
   ITEMS=m.items||[];var H=m.hours||{};
   // Days come from Square: any weekday with pickup hours or a day category with items gets its own section.
   if(m.days&&m.days.length){var ND={};m.days.forEach(function(x){ND[x.key]=x.popup?{name:x.name,popup:true}:{name:x.name,dow:x.dow,date:x.date,special:x.special,hours:H[x.key]||'Pickup hours posted soon',addr:m.address||''}});DAYS=ND;jumpUI()}
   else Object.keys(DAYS).forEach(function(k){if(!DAYS[k].popup){DAYS[k].hours=H[k]||'Pickup hours posted soon';if(m.address)DAYS[k].addr=m.address}});
-  POPUP=m.popup||null;LOADING=false;render();goHash()}).catch(function(){LOADING=false;render()});
+  POPUP=m.popup||null;LOADING=false;render();if(first)goHash()}).catch(function(){if(first){LOADING=false;render()}})}
+if(LIVE){loadMenu(true);var lastChk=Date.now();
+  function recheck(){if(document.visibilityState!=='visible'||Date.now()-lastChk<60e3)return;lastChk=Date.now();loadMenu(false)}
+  document.addEventListener('visibilitychange',recheck);addEventListener('focus',recheck);setInterval(function(){lastChk=0;recheck()},5*60e3)}
 var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.12});
 document.getElementById('herorow').innerHTML=['cinnamon','vanilla','guava','biscoff'].map(function(k){return '<figure>'+svg(k)+'<figcaption>'+LABEL[k]+'</figcaption></figure>'}).join('');
 var hr=document.getElementById('herorow');setTimeout(function(){hr.querySelectorAll('.draw').forEach(function(s,i){setTimeout(function(){s.classList.add('in')},i*250)})},300);
