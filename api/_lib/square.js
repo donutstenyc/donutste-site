@@ -177,10 +177,12 @@ async function getMenu(debug) {
     const per = (P.business_hours && P.business_hours.periods) || [];
     const today = todayIn(tz);
     const codes = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-    for (let k = 1; k <= 14 && !popup; k++) {
+    // Today counts until today's pop-up hours have ended (local time), then it rolls to the next date.
+    const nowHM = new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date());
+    for (let k = 0; k <= 14 && !popup; k++) {
       const [y, m, d] = today.split('-').map(Number);
       const dt = new Date(Date.UTC(y, m - 1, d + k));
-      const ps = per.filter((p) => p.day_of_week === codes[dt.getUTCDay()]);
+      const ps = per.filter((p) => p.day_of_week === codes[dt.getUTCDay()] && (k > 0 || String(p.end_local_time).slice(0, 5) > nowHM));
       if (ps.length) {
         const pa = P.address || {};
         popup = {
